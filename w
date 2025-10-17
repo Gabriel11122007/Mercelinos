@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Supabase</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body class="bg-amber-100 flex h-screen">
+
+  <!-- Header (Mobile) -->
+  <header
+    class="fixed lg:hidden top-0 left-0 w-full bg-yellow-700 text-white flex items-center justify-between px-4 py-3 shadow-md z-50">
+    <button id="menuBtn" class="p-2 rounded-md focus:outline-none bg-yellow-800">
+      <!-- Ícone Menu -->
+      <svg id="menuIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
+        viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+      <!-- Ícone Fechar -->
+      <svg id="closeIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden" fill="none"
+        viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+    <h1 class="font-semibold text-lg">Painel Administrativo</h1>
+  </header>
+
+  <!-- Overlay escurecido ao abrir o menu -->
+  <div id="overlay" class="hidden fixed inset-0 bg-black bg-opacity-40 z-30 transition-opacity"></div>
+
+  <!-- Sidebar -->
+  <aside id="sidebar"
+    class="fixed top-0 left-0 h-full w-64 bg-yellow-700 text-white flex flex-col justify-between shadow-lg transform -translate-x-full lg:translate-x-0 lg:static transition-transform duration-300 ease-in-out z-40">
+
+    <div>
+      <!-- Logo -->
+      <div class="bg-gray-200 text-black flex justify-center items-center h-24">
+        <img src="https://via.placeholder.com/80x80.png?text=LOGO"
+          alt="Logo"
+          class="max-h-16 max-w-[80%] object-contain">
+      </div>
+
+      <!-- Navegação -->
+      <nav class="flex flex-col gap-2 p-4">
+        <a href="dashboard.html"
+          class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-full text-center transition">Home</a>
+        <a href="gerenciar-avaliacao.html"
+          class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-full text-center transition">Avaliação</a>
+        <a href="#"
+          class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-full text-center transition">Produtos</a>
+        <a href="#"
+          class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-full text-center transition">Usuários</a>
+        <a href="promocao.html"
+          class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-full text-center transition">Promoção</a>
+        <a href="sobrenos.html"
+          class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-full text-center transition">Sobre Nós</a>
+        <a href="faq.html"
+          class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-full text-center transition">FAQ</a>
+        <a href="gerenciar-banners.html"
+          class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-full text-center transition">Banner</a>
+      </nav>
+    </div>
+
+    <button id="logoutBtn"
+      class="m-4 bg-red-600 hover:bg-red-700 py-2 rounded-full text-center font-semibold transition">
+      Logout
+    </button>
+  </aside>
+
+  <!-- Conteúdo principal -->
+  <main id="mainContent" class="flex-1 p-6 mt-16 lg:mt-0 transition-all duration-300 ease-in-out lg:ml-0">
+    <h2 id="saudacaoUsuario" class="text-3xl font-bold text-yellow-700 mb-8">Olá, usuário 👋</h2>
+
+    <!-- Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+      <!-- Usuários -->
+      <div class="bg-yellow-600 text-black rounded-lg p-6 flex flex-col justify-between shadow-md">
+        <div class="flex items-center gap-3">
+          <div class="text-4xl">🧍</div>
+          <div>
+            <h2 id="qtdUsuarios" class="text-3xl font-bold">0</h2>
+            <p class="text-lg">Usuários</p>
+          </div>
+        </div>
+        <p id="taxaUsuarios" class="text-green-800 mt-3 font-semibold">↑ 0% desde último mês</p>
+      </div>
+
+      <!-- Produtos -->
+      <div class="bg-yellow-600 text-black rounded-lg p-6 flex flex-col justify-between shadow-md">
+        <div class="flex items-center gap-3">
+          <div class="text-4xl">🛒</div>
+          <div>
+            <h2 id="qtdProdutos" class="text-3xl font-bold">0</h2>
+            <p class="text-lg">Produtos</p>
+          </div>
+        </div>
+        <p id="taxaProdutos" class="text-green-800 mt-3 font-semibold">↑ 0% desde último mês</p>
+      </div>
+    </div>
+
+    <p class="text-gray-700">Bem-vindo ao painel. Use o menu lateral para navegar.</p>
+  </main>
+
+  <!-- Script do menu lateral -->
+  <script>
+    const sidebar = document.getElementById('sidebar');
+    const menuBtn = document.getElementById('menuBtn');
+    const menuIcon = document.getElementById('menuIcon');
+    const closeIcon = document.getElementById('closeIcon');
+    const overlay = document.getElementById('overlay');
+
+    menuBtn.addEventListener('click', () => {
+      const isOpen = sidebar.classList.contains('translate-x-0');
+
+      if (isOpen) {
+        sidebar.classList.replace('translate-x-0', '-translate-x-full');
+        overlay.classList.add('hidden');
+        menuIcon.classList.remove('hidden');
+        closeIcon.classList.add('hidden');
+      } else {
+        sidebar.classList.replace('-translate-x-full', 'translate-x-0');
+        overlay.classList.remove('hidden');
+        menuIcon.classList.add('hidden');
+        closeIcon.classList.remove('hidden');
+      }
+    });
+
+    overlay.addEventListener('click', () => {
+      sidebar.classList.replace('translate-x-0', '-translate-x-full');
+      overlay.classList.add('hidden');
+      menuIcon.classList.remove('hidden');
+      closeIcon.classList.add('hidden');
+    });
+  </script>
+
+  <!-- Script Supabase -->
+  <script>
+    const URL_SUPABASE = 'https://ulxbfffiidjlartupase.supabase.co';
+    const KEY_SUPABASE = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVseGJmZmZpaWRqbGFydHVwYXNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwMDg5OTYsImV4cCI6MjA3MjU4NDk5Nn0.f3-wyXvWJtYR12sWD8bZNW0rFxmz-xq0BT8yuc8boWQ';
+    const supabase = window.supabase.createClient(URL_SUPABASE, KEY_SUPABASE);
+
+    async function verificarLoginDashboard() {
+      const isLoggedIn = localStorage.getItem("isLoggedIn");
+      const nomeUsuario = localStorage.getItem("nomeUsuario");
+      const emailUsuario = localStorage.getItem("emailUsuario");
+
+      if (!isLoggedIn || isLoggedIn !== "true") {
+        window.location.href = "../cadastro/login.html";
+        return;
+      }
+
+      let usuarioData = null;
+      if (emailUsuario) {
+        const { data, error } = await supabase
+          .from("usuario")
+          .select("nome")
+          .eq("email", emailUsuario)
+          .single();
+
+        if (!error && data) usuarioData = data;
+      }
+
+      if (usuarioData && usuarioData.nome) {
+        document.getElementById("saudacaoUsuario").textContent = `Olá, ${usuarioData.nome} 👋`;
+      } else if (nomeUsuario) {
+        document.getElementById("saudacaoUsuario").textContent = `Olá, ${nomeUsuario} 👋`;
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("nomeUsuario");
+      localStorage.removeItem("emailUsuario");
+      alert("Você saiu com sucesso!");
+      window.location.href = "../cadastro/login.html";
+    }
+
+    document.getElementById("logoutBtn").addEventListener("click", logout);
+
+    (async () => {
+      await verificarLoginDashboard();
+    })();
+  </script>
+
+</body>
+</html>

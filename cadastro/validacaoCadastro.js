@@ -157,11 +157,6 @@ function initCadastro() {
     }, 2500);
 
   });
-  if (!termosCheck.checked || !privacidadeCheck.checked) {
-  alert('Você precisa aceitar os Termos de Uso e a Política de Privacidade.');
-  return;
-}
-
 }
 
 // Inicializa quando o DOM estiver pronto

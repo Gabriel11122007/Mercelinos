@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FAQ - Dashboard Supabase</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body class="bg-amber-100 flex h-screen">
+
+  <!-- Sidebar -->
+  <aside class="w-60 bg-yellow-700 text-white flex flex-col justify-between shadow-lg">
+    <div>
+      <div class="bg-gray-200 text-black text-center font-bold py-6 text-xl">LOGO</div>
+      <nav class="flex flex-col gap-2 p-4">
+        <a href="dashboard.html" class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-full text-center">Home</a>
+        <a href="#" class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-full text-center">Avaliação</a>
+        <a href="#" class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-full text-center">Produtos</a>
+        <a href="#" class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-full text-center">Usuários</a>
+        <a href="#" class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-full text-center">Promoção</a>
+        <a href="sobrenos.html" class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-full text-center">Sobre Nós</a>
+        <a href="faq.html" class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-full text-center">FAQ</a>
+        <a href="#" class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-full text-center">Banner</a>
+      </nav>
+    </div>
+
+    <!-- Botão Logout -->
+    <button id="logoutBtn" class="m-4 bg-red-600 hover:bg-red-700 py-2 rounded-full text-center font-semibold">
+      Logout
+    </button>
+  </aside>
+
+  <!-- Main -->
+  <main class="flex-1 bg-amber-100 p-8 overflow-y-auto">
+    <h1 class="text-3xl font-bold text-yellow-800 mb-6">Gerenciar FAQ</h1>
+
+    <!-- Formulário Adicionar -->
+    <form id="formAddFAQ" class="bg-yellow-50 p-4 rounded-lg shadow-md mb-8 flex flex-col gap-3">
+      <h2 class="text-xl font-semibold text-yellow-800">Adicionar nova pergunta</h2>
+      <input id="novaPergunta" type="text" placeholder="Pergunta"
+        class="border border-yellow-600 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-yellow-600" required>
+      <textarea id="novaResposta" placeholder="Resposta"
+        class="border border-yellow-600 rounded-md p-2 h-24 focus:outline-none focus:ring-2 focus:ring-yellow-600"
+        required></textarea>
+      <button type="submit"
+        class="bg-yellow-700 text-white rounded-full py-2 font-semibold hover:bg-yellow-800">Adicionar FAQ</button>
+    </form>
+
+    <!-- Lista de Perguntas -->
+    <div id="faqContainer" class="space-y-4"></div>
+  </main>
+
+  <script>
+    // Configuração Supabase
+    const URL_SUPABASE = 'https://ulxbfffiidjlartupase.supabase.co';
+    const KEY_SUPABASE = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVseGJmZmZpaWRqbGFydHVwYXNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwMDg5OTYsImV4cCI6MjA3MjU4NDk5Nn0.f3-wyXvWJtYR12sWD8bZNW0rFxmz-xq0BT8yuc8boWQ';
+    const supabase = window.supabase.createClient(URL_SUPABASE, KEY_SUPABASE);
+
+    const faqContainer = document.getElementById("faqContainer");
+    const formAddFAQ = document.getElementById("formAddFAQ");
+
+    // === Função: Carregar FAQs ===
+    async function carregarFAQs() {
+      faqContainer.innerHTML = "<p class='text-gray-600'>Carregando...</p>";
+      const { data, error } = await supabase.from("faq").select("*").order("id_question", { ascending: true });
+      if (error) {
+        faqContainer.innerHTML = `<p class='text-red-600'>Erro ao carregar FAQs.</p>`;
+        return;
+      }
+
+      if (data.length === 0) {
+        faqContainer.innerHTML = `<p class='text-gray-700 italic'>Nenhuma pergunta cadastrada ainda.</p>`;
+        return;
+      }
+
+      faqContainer.innerHTML = "";
+      data.forEach(faq => {
+        const card = document.createElement("div");
+        card.className = "bg-yellow-200 p-4 rounded-lg shadow-md flex flex-col gap-2";
+
+        card.innerHTML = `
+          <div class="flex justify-between items-center">
+            <h3 class="text-lg font-semibold text-yellow-900">${faq.question}</h3>
+            <div class="flex gap-2">
+              <button class="editar bg-blue-600 text-white px-3 py-1 rounded-full hover:bg-blue-700" data-id="${faq.id_question}">Editar</button>
+              <button class="excluir bg-red-600 text-white px-3 py-1 rounded-full hover:bg-red-700" data-id="${faq.id_question}">Excluir</button>
+            </div>
+          </div>
+          <p class="text-black">${faq.answer}</p>
+        `;
+        faqContainer.appendChild(card);
+      });
+
+      adicionarEventosBotoes();
+    }
+
+    // === Função: Adicionar FAQ ===
+    formAddFAQ.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const question = document.getElementById("novaPergunta").value.trim();
+      const answer = document.getElementById("novaResposta").value.trim();
+
+      if (!question || !answer) {
+        alert("Preencha todos os campos!");
+        return;
+      }
+
+      const { error } = await supabase.from("faq").insert([{ question, answer }]);
+      if (error) {
+        alert("Erro ao adicionar FAQ!");
+        return;
+      }
+
+      formAddFAQ.reset();
+      carregarFAQs();
+    });
+
+    // === Função: Adicionar eventos de edição e exclusão ===
+    function adicionarEventosBotoes() {
+      document.querySelectorAll(".editar").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const id = btn.dataset.id;
+          const pergunta = prompt("Nova pergunta:");
+          const resposta = prompt("Nova resposta:");
+          if (pergunta && resposta) {
+            const { error } = await supabase
+              .from("faq")
+              .update({ question: pergunta, answer: resposta })
+              .eq("id_question", id);
+            if (error) alert("Erro ao editar FAQ!");
+            else carregarFAQs();
+          }
+        });
+      });
+
+      document.querySelectorAll(".excluir").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const id = btn.dataset.id;
+          if (confirm("Tem certeza que deseja excluir esta FAQ?")) {
+            const { error } = await supabase.from("faq").delete().eq("id_question", id);
+            if (error) alert("Erro ao excluir FAQ!");
+            else carregarFAQs();
+          }
+        });
+      });
+    }
+
+    // === Função: Logout ===
+    function logout() {
+      localStorage.clear();
+      window.location.href = "../cadastro/login.html";
+    }
+
+    document.getElementById("logoutBtn").addEventListener("click", logout);
+
+    // Inicialização
+    carregarFAQs();
+  </script>
+</body>
+</html>

@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Gerenciar Promoções</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-amber-100 min-h-screen font-sans">
+
+  <header class="bg-yellow-700 text-white py-4 text-center text-xl font-bold shadow-md">
+    💸 Gerenciar Promoções
+  </header>
+
+  <main class="p-6">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <label class="mr-2 font-medium text-yellow-800">Filtro:</label>
+        <select id="filtro" class="border rounded-md p-1">
+          <option value="todos">Todos</option>
+          <option value="com">Com promoção</option>
+          <option value="sem">Sem promoção</option>
+        </select>
+      </div>
+      <div id="mensagemGlobal" class="text-sm font-medium text-green-700"></div>
+    </div>
+
+    <div id="containerProdutos" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+  </main>
+
+<script>
+  // === CONFIG SUPABASE ===
+  const SUPABASE_URL = "https://ulxbfffiidjlartupase.supabase.co";
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVseGJmZmZpaWRqbGFydHVwYXNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwMDg5OTYsImV4cCI6MjA3MjU4NDk5Nn0.f3-wyXvWJtYR12sWD8bZNW0rFxmz-xq0BT8yuc8boWQ";
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const container = document.getElementById("containerProdutos");
+  const filtroEl = document.getElementById("filtro");
+  const mensagemGlobal = document.getElementById("mensagemGlobal");
+
+  // === CARREGAR PRODUTOS E PROMOÇÕES ===
+  async function carregarProdutos() {
+    container.innerHTML = `<p class="col-span-full text-center text-yellow-800 font-semibold">Carregando...</p>`;
+    mensagemGlobal.textContent = "";
+
+    try {
+      const [{ data: itens, error: erroItens }, { data: promocoes, error: erroProm }] = await Promise.all([
+        supabase.from("item").select("id_item, nome, preco, imagem, descricao"),
+        supabase.from("promocao").select("id_promocao, item_id, desconto")
+      ]);
+
+      if (erroItens) throw erroItens;
+      if (erroProm) throw erroProm;
+
+      renderizarCards(itens || [], promocoes || []);
+    } catch (err) {
+      console.error("Erro ao carregar dados:", err);
+      container.innerHTML = `<p class="col-span-full text-center text-red-600">Erro ao carregar produtos. Veja console.</p>`;
+    }
+  }
+
+  // === RENDERIZAR CARDS ===
+  function renderizarCards(itens, promocoes) {
+    const filtro = filtroEl.value;
+    container.innerHTML = "";
+
+    const itensFiltrados = itens.filter(item => {
+      const temPromo = promocoes.some(p => p.item_id === item.id_item);
+      if (filtro === "com") return temPromo;
+      if (filtro === "sem") return !temPromo;
+      return true;
+    });
+
+    if (itensFiltrados.length === 0) {
+      container.innerHTML = `<p class="col-span-full text-center text-gray-500">Nenhum produto encontrado.</p>`;
+      return;
+    }
+
+    itensFiltrados.forEach(item => {
+      const promo = promocoes.find(p => p.item_id === item.id_item);
+      const descontoPct = promo ? Math.round(promo.desconto * 100) : 0;
+      const precoBase = Number(item.preco) || 0;
+      const precoFinal = (precoBase * (1 - (promo?.desconto ?? 0))).toFixed(2);
+
+      const card = document.createElement("div");
+      card.className = "bg-white rounded-xl shadow p-3 flex flex-col";
+
+      card.innerHTML = `
+        <div class="flex items-start gap-3">
+          <img src="${item.imagem || 'https://via.placeholder.com/120x80?text=Sem+Imagem'}"
+               alt="${escapeHtml(item.nome)}"
+               class="w-28 h-18 object-cover rounded-md flex-shrink-0">
+          <div class="flex-1 min-w-0">
+            <div class="flex justify-between items-start">
+              <h3 class="text-sm font-semibold text-yellow-800 truncate">${escapeHtml(item.nome)}</h3>
+              <span class="text-xs text-gray-500">ID ${item.id_item}</span>
+            </div>
+            <p class="text-xs text-gray-600 mt-1 line-clamp-2">${escapeHtml(item.descricao || '')}</p>
+
+            <div class="mt-2 flex items-center gap-2">
+              <div class="text-xs text-gray-700">Original</div>
+              <div class="text-sm font-medium line-through text-red-500">R$ ${precoBase.toFixed(2)}</div>
+            </div>
+
+            <div class="mt-1">
+              <div class="text-xs text-gray-700">Final</div>
+              <div class="text-sm font-bold text-green-700">R$ <span id="final_${item.id_item}">${precoFinal}</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-3 grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-xs text-yellow-800 font-medium mb-1">Preço (R$)</label>
+            <input type="number" id="preco_${item.id_item}" value="${precoBase.toFixed(2)}" step="0.01" min="0"
+                   class="w-full border rounded px-2 py-1 text-sm" />
+          </div>
+
+          <div>
+            <label class="block text-xs text-yellow-800 font-medium mb-1">Desconto (%)</label>
+            <input type="number" id="desconto_${item.id_item}" value="${descontoPct}" min="0" max="100" step="1"
+                   class="w-full border rounded px-2 py-1 text-sm" />
+          </div>
+
+          <div class="col-span-2 flex gap-2 mt-2">
+            <button id="salvarBtn_${item.id_item}" onclick="salvarAlteracoes(${item.id_item})"
+              class="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white py-1 rounded text-sm font-semibold">
+              💾 Salvar
+            </button>
+            ${promo ? `<button id="removerBtn_${promo.id_promocao}" onclick="removerPromocao(${promo.id_promocao})"
+              class="bg-red-600 hover:bg-red-700 text-white py-1 px-3 rounded text-sm">🗑️ Remover</button>` : ""}
+          </div>
+        </div>
+      `;
+
+      // Atualiza preço final dinamicamente
+      const precoInput = card.querySelector(`#preco_${item.id_item}`);
+      const descontoInput = card.querySelector(`#desconto_${item.id_item}`);
+      const finalSpan = card.querySelector(`#final_${item.id_item}`);
+
+      function atualizarFinal() {
+        const p = Number(precoInput.value) || 0;
+        const d = (Number(descontoInput.value) || 0) / 100;
+        finalSpan.textContent = (p * (1 - d)).toFixed(2);
+      }
+
+      precoInput.addEventListener("input", atualizarFinal);
+      descontoInput.addEventListener("input", atualizarFinal);
+
+      container.appendChild(card);
+    });
+  }
+
+  // === SALVAR ALTERAÇÕES ===
+  async function salvarAlteracoes(id_item) {
+    const btn = document.getElementById(`salvarBtn_${id_item}`);
+    if (!btn) return;
+
+    btn.disabled = true;
+    const oldText = btn.innerHTML;
+    btn.innerHTML = "Salvando...";
+
+    try {
+      const precoEl = document.getElementById(`preco_${id_item}`);
+      const descontoEl = document.getElementById(`desconto_${id_item}`);
+
+      const preco = Number(precoEl.value);
+      const descontoPct = Number(descontoEl.value);
+
+      if (isNaN(preco) || preco <= 0) {
+        alert("Preço inválido. Informe um valor maior que 0.");
+        return;
+      }
+      if (isNaN(descontoPct) || descontoPct < 0 || descontoPct > 100) {
+        alert("Desconto deve estar entre 0 e 100.");
+        return;
+      }
+
+      const desconto = descontoPct / 100;
+
+      // Atualiza o preço do item
+      const { error: errAtualizaPreco } = await supabase
+        .from("item")
+        .update({ preco })
+        .eq("id_item", id_item);
+
+      if (errAtualizaPreco) throw errAtualizaPreco;
+
+      // Verifica se já existe promoção
+      const { data: existente, error: errExist } = await supabase
+        .from("promocao")
+        .select("id_promocao")
+        .eq("item_id", id_item)
+        .maybeSingle();
+
+      if (errExist) throw errExist;
+
+      if (existente && existente.id_promocao) {
+        // Atualiza promoção existente
+        const { error: errUpd } = await supabase
+          .from("promocao")
+          .update({ desconto })
+          .eq("item_id", id_item);
+        if (errUpd) throw errUpd;
+      } else {
+        // Cria nova promoção
+        const { error: errIns } = await supabase
+          .from("promocao")
+          .insert([{ item_id: id_item, desconto }]);
+        if (errIns) throw errIns;
+      }
+
+      mensagemGlobal.textContent = "✅ Salvo com sucesso!";
+      setTimeout(() => (mensagemGlobal.textContent = ""), 3000);
+      await carregarProdutos();
+    } catch (err) {
+      console.error("Erro ao salvar alterações:", err);
+      alert("Erro ao salvar. Veja console para detalhes.");
+    } finally {
+      const btnRest = document.getElementById(`salvarBtn_${id_item}`);
+      if (btnRest) {
+        btnRest.disabled = false;
+        btnRest.innerHTML = oldText;
+      }
+    }
+  }
+
+  // === REMOVER PROMOÇÃO ===
+  async function removerPromocao(id_promocao) {
+    if (!confirm("Deseja remover esta promoção?")) return;
+    try {
+      const { error } = await supabase.from("promocao").delete().eq("id_promocao", id_promocao);
+      if (error) throw error;
+      mensagemGlobal.textContent = "🗑️ Promoção removida!";
+      setTimeout(() => (mensagemGlobal.textContent = ""), 3000);
+      carregarProdutos();
+    } catch (err) {
+      console.error("Erro ao remover promoção:", err);
+      alert("Erro ao remover promoção. Veja console.");
+    }
+  }
+
+  // === UTILITÁRIO HTML SAFE ===
+  function escapeHtml(str) {
+    if (!str) return "";
+    return String(str)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  // Eventos
+  filtroEl.addEventListener("change", carregarProdutos);
+  carregarProdutos();
+</script>
+</body>
+</html>

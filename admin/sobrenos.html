@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gerenciar sobre nós - supabase</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body class="bg-amber-100 flex h-screen">
+
+  <!-- Sidebar -->
+  <aside class="w-60 bg-yellow-700 text-white flex flex-col justify-between shadow-lg">
+    <div>
+      <div class="bg-gray-200 text-black text-center font-bold py-6 text-xl">LOGO</div>
+      <nav class="flex flex-col gap-2 p-4">
+        <a href="dashboard.html" class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-full text-center">Home</a>
+        <a href="#" class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-full text-center">Avaliação</a>
+        <a href="#" class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-full text-center">Produtos</a>
+        <a href="#" class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-full text-center">Usuários</a>
+        <a href="#" class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-full text-center">Promoção</a>
+        <a href="sobrenos.html" class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-full text-center">Sobre Nós</a>
+        <a href="faq.html" class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-full text-center">FAQ</a>
+        <a href="#" class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-full text-center">Banner</a>
+      </nav>
+    </div>
+
+    <!-- Botão Logout -->
+    <button id="logoutBtn" class="m-4 bg-red-600 hover:bg-red-700 py-2 rounded-full text-center font-semibold">
+      Logout
+    </button>
+  </aside>
+
+  <!-- main -->
+  <main class="flex-1 p-8 overflow-y-auto">
+    <h1 class="text-3xl font-bold text-yellow-800 mb-6">gerenciar "sobre nós"</h1>
+
+    <!-- formulário adicionar -->
+    <form id="formaddabtus" class="bg-yellow-50 p-4 rounded-lg shadow-md mb-8 flex flex-col gap-3" enctype="multipart/form-data">
+      <h2 class="text-xl font-semibold text-yellow-800">adicionar nova seção</h2>
+
+      <input id="novaimagem" type="file" accept="image/*" required
+        class="border border-yellow-600 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-yellow-600 bg-white" />
+
+      <img id="previewimagem" class="hidden w-40 h-40 object-cover rounded-md border border-yellow-600" />
+
+      <textarea id="novadescricao" placeholder="descrição"
+        class="border border-yellow-600 rounded-md p-2 h-24 focus:outline-none focus:ring-2 focus:ring-yellow-600"
+        required></textarea>
+
+      <button type="submit"
+        class="bg-yellow-700 text-white rounded-full py-2 font-semibold hover:bg-yellow-800">adicionar</button>
+    </form>
+
+    <!-- lista -->
+    <div id="abtuscontainer" class="space-y-6"></div>
+  </main>
+
+  <script>
+    // === configuração supabase ===
+    const url_supabase = "https://ulxbfffiidjlartupase.supabase.co";
+    const key_supabase = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVseGJmZmZpaWRqbGFydHVwYXNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwMDg5OTYsImV4cCI6MjA3MjU4NDk5Nn0.f3-wyXvWJtYR12sWD8bZNW0rFxmz-xq0BT8yuc8boWQ";
+    const supabase = window.supabase.createClient(url_supabase, key_supabase);
+    const bucket = "BannersDB";
+    const pasta = "abtus";
+
+    const formaddabtus = document.getElementById("formaddabtus");
+    const abtuscontainer = document.getElementById("abtuscontainer");
+    const inputimagem = document.getElementById("novaimagem");
+    const previewimagem = document.getElementById("previewimagem");
+
+    // preview da imagem
+    inputimagem.addEventListener("change", () => {
+      const file = inputimagem.files[0];
+      if (file) {
+        previewimagem.src = URL.createObjectURL(file);
+        previewimagem.classList.remove("hidden");
+      } else {
+        previewimagem.classList.add("hidden");
+      }
+    });
+
+    // carregar registros
+    async function carregarabtus() {
+      abtuscontainer.innerHTML = "<p class='text-gray-600'>carregando...</p>";
+      const { data, error } = await supabase
+        .from("abtus")
+        .select("*")
+        .order("id_abtus", { ascending: true });
+
+      if (error) {
+        console.error("erro ao buscar abtus:", error);
+        abtuscontainer.innerHTML = "<p class='text-red-600'>erro ao carregar registros.</p>";
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        abtuscontainer.innerHTML = "<p class='italic text-gray-600'>nenhum conteúdo cadastrado ainda.</p>";
+        return;
+      }
+
+      abtuscontainer.innerHTML = "";
+      data.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "bg-yellow-200 p-4 rounded-lg shadow flex flex-col gap-3";
+        div.innerHTML = `
+          <img src="${item.url_img}" alt="imagem" class="w-full h-48 object-cover rounded-md border border-yellow-600" onerror="this.src='https://via.placeholder.com/400x300?text=erro+na+imagem';" />
+          <p class="text-black">${item.descricao}</p>
+          <div class="flex gap-2">
+            <button class="bg-yellow-700 hover:bg-yellow-800 text-white py-1 px-3 rounded-full" onclick="editarabtus(${item.id_abtus}, '${encodeURIComponent(item.descricao)}', '${encodeURIComponent(item.url_img)}')">editar</button>
+            <button class="bg-red-600 hover:bg-red-700 text-white py-1 px-3 rounded-full" onclick="excluirabtus(${item.id_abtus})">excluir</button>
+          </div>
+        `;
+        abtuscontainer.appendChild(div);
+      });
+    }
+
+    // adicionar novo
+    formaddabtus.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const file = inputimagem.files[0];
+      const descricao = document.getElementById("novadescricao").value.trim();
+
+      if (!file || !descricao) {
+        alert("preencha todos os campos!");
+        return;
+      }
+
+      const nomearquivo = `${pasta}/${Date.now()}_${file.name.replace(/\s+/g, "_")}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from(bucket)
+        .upload(nomearquivo, file, { upsert: false });
+
+      if (uploadError) {
+        console.error("erro ao enviar imagem:", uploadError);
+        alert("falha no upload da imagem!");
+        return;
+      }
+
+      const { data: publicData } = supabase.storage
+        .from(bucket)
+        .getPublicUrl(nomearquivo);
+
+      const url_img = publicData.publicUrl;
+
+      const { error: insertError } = await supabase
+        .from("abtus")
+        .insert([{ url_img, descricao }]);
+
+      if (insertError) {
+        console.error("erro ao inserir no banco:", insertError);
+        alert("erro ao salvar no banco!");
+        return;
+      }
+
+      alert("conteúdo adicionado com sucesso!");
+      formaddabtus.reset();
+      previewimagem.classList.add("hidden");
+      carregarabtus();
+    });
+
+    // excluir
+    async function excluirabtus(id) {
+      if (!confirm("deseja realmente excluir?")) return;
+      const { error } = await supabase.from("abtus").delete().eq("id_abtus", id);
+      if (error) {
+        console.error("erro ao excluir:", error);
+        alert("erro ao excluir!");
+      } else {
+        carregarabtus();
+      }
+    }
+
+    // editar
+    async function editarabtus(id, descricaoAntiga, imagemAtual) {
+      descricaoAntiga = decodeURIComponent(descricaoAntiga);
+      imagemAtual = decodeURIComponent(imagemAtual);
+
+      // Cria modal simples
+      const modal = document.createElement("div");
+      modal.className = "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50";
+      modal.innerHTML = `
+        <div class="bg-white rounded-lg p-6 w-96 shadow-lg flex flex-col gap-4">
+          <h2 class="text-xl font-semibold text-yellow-800">editar seção</h2>
+          <img src="${imagemAtual}" class="w-full h-40 object-cover rounded-md border border-yellow-600" id="editPreview">
+          <input type="file" id="editImagem" accept="image/*" class="border border-yellow-600 rounded-md p-2 bg-white">
+          <textarea id="editDescricao" class="border border-yellow-600 rounded-md p-2 h-24 focus:outline-none focus:ring-2 focus:ring-yellow-600">${descricaoAntiga}</textarea>
+          <div class="flex justify-end gap-2">
+            <button id="cancelEdit" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-1 rounded-full">cancelar</button>
+            <button id="saveEdit" class="bg-yellow-700 hover:bg-yellow-800 text-white px-4 py-1 rounded-full">salvar</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+
+      const fileInput = modal.querySelector("#editImagem");
+      const preview = modal.querySelector("#editPreview");
+      const descInput = modal.querySelector("#editDescricao");
+      const cancelBtn = modal.querySelector("#cancelEdit");
+      const saveBtn = modal.querySelector("#saveEdit");
+
+      fileInput.addEventListener("change", () => {
+        const file = fileInput.files[0];
+        if (file) preview.src = URL.createObjectURL(file);
+      });
+
+      cancelBtn.addEventListener("click", () => modal.remove());
+
+      saveBtn.addEventListener("click", async () => {
+        const novaDescricao = descInput.value.trim();
+        let novaUrl = imagemAtual;
+
+        if (!novaDescricao) {
+          alert("a descrição não pode estar vazia!");
+          return;
+        }
+
+        const file = fileInput.files[0];
+        if (file) {
+          const nomearquivo = `${pasta}/${Date.now()}_${file.name.replace(/\s+/g, "_")}`;
+          const { error: uploadError } = await supabase.storage.from(bucket).upload(nomearquivo, file, { upsert: false });
+          if (uploadError) {
+            alert("erro ao enviar nova imagem!");
+            console.error(uploadError);
+            return;
+          }
+          const { data: publicData } = supabase.storage.from(bucket).getPublicUrl(nomearquivo);
+          novaUrl = publicData.publicUrl;
+        }
+
+        const { error: updateError } = await supabase
+          .from("abtus")
+          .update({ descricao: novaDescricao, url_img: novaUrl })
+          .eq("id_abtus", id);
+
+        if (updateError) {
+          alert("erro ao salvar alterações!");
+          console.error(updateError);
+          return;
+        }
+
+        alert("registro atualizado com sucesso!");
+        modal.remove();
+        carregarabtus();
+      });
+    }
+
+    // logout
+    document.getElementById("logoutbtn").addEventListener("click", () => {
+      localStorage.clear();
+      window.location.href = "../cadastro/login.html";
+    });
+
+    carregarabtus();
+  </script>
+</body>
+</html>
