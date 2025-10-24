@@ -1,18 +1,15 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HOME - Dashboard</title>
+  <title>CATEGORIA - Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <link rel="icon" type="image/png" href="Icon.jpg">
 
 <body class="bg-amber-100 flex h-screen">
-
   <!-- Header (Mobile) -->
   <header
     class="fixed lg:hidden top-0 left-0 w-full bg-yellow-700 text-white flex items-center justify-between px-4 py-3 shadow-md z-40">
@@ -75,41 +72,46 @@
     </button>
   </aside>
 
-  <!-- Conteúdo principal -->
-  <main id="mainContent" class="flex-1 p-6 mt-16 lg:mt-0 transition-all duration-300 ease-in-out">
-    <h2 id="saudacaoUsuario" class="text-3xl font-bold text-yellow-700 mb-8">Olá, usuário 👋</h2>
+  <!-- Main -->
+  <main class="flex-1 p-8 overflow-y-auto">
+    <h1 class="text-3xl font-bold text-yellow-800 mb-6">Gerenciar Categorias</h1>
 
-    <!-- Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-      <!-- Usuários -->
-      <div class="bg-yellow-600 text-black rounded-lg p-6 flex flex-col justify-between shadow-md">
-        <div class="flex items-center gap-3">
-          <div class="text-4xl">🧍</div>
-          <div>
-            <h2 id="qtdUsuarios" class="text-3xl font-bold">0</h2>
-            <p class="text-lg">Usuários</p>
-          </div>
-        </div>
-      </div>
+<!-- Formulário para adicionar categoria -->
+<div class="bg-white p-6 rounded-2xl shadow-lg mb-6 max-w-md mx-auto">
+  <h2 class="text-2xl font-bold text-yellow-800 mb-5 text-center">Adicionar nova categoria</h2>
 
-      <!-- Produtos -->
-      <div class="bg-yellow-600 text-black rounded-lg p-6 flex flex-col justify-between shadow-md">
-        <div class="flex items-center gap-3">
-          <div class="text-4xl">🛒</div>
-          <div>
-            <h2 id="qtdProdutos" class="text-3xl font-bold">0</h2>
-            <p class="text-lg">Produtos</p>
-          </div>
-        </div>
-      </div>
+  <form id="formCategoria" class="flex flex-col sm:flex-row gap-4">
+    <!-- Input da categoria -->
+    <input type="text" id="nomeCategoria" placeholder="Nome da categoria"
+           class="flex-1 border border-gray-300 rounded-full px-4 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-700 shadow-sm"
+           required />
+
+    <!-- Botão -->
+    <button type="submit"
+            class="bg-yellow-700 hover:bg-yellow-800 text-white px-6 py-3 rounded-full font-semibold transition-all duration-200 shadow-md">
+      Adicionar
+    </button>
+  </form>
+</div>
+
+
+    <!-- Tabela -->
+    <div class="overflow-x-auto bg-white rounded-lg shadow-md">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-yellow-600 text-black">
+            <th class="p-3">ID</th>
+            <th class="p-3">Nome</th>
+            <th class="p-3 text-center">Ação</th>
+          </tr>
+        </thead>
+        <tbody id="tabelaCategorias" class="divide-y divide-gray-200"></tbody>
+      </table>
     </div>
-
-    <p class="text-gray-700">Bem-vindo ao painel. Use o menu lateral para navegar.</p>
   </main>
 
 
-  
-<script>
+  <script>
   // Função de logout
   function logout() {
     // Remove os dados do usuário do localStorage
@@ -130,54 +132,25 @@
     btnLogout.addEventListener("click", logout);
   }
 </script>
-
-  <!-- Script do menu lateral -->
   <script>
-    const sidebar = document.getElementById('sidebar');
-    const menuBtn = document.getElementById('menuBtn');
-    const menuIcon = document.getElementById('menuIcon');
-    const closeIcon = document.getElementById('closeIcon');
-    const overlay = document.getElementById('overlay');
-
-    menuBtn.addEventListener('click', () => {
-      const isOpen = sidebar.classList.contains('translate-x-0');
-      if (isOpen) {
-        sidebar.classList.replace('translate-x-0', '-translate-x-full');
-        overlay.classList.add('hidden');
-        menuIcon.classList.remove('hidden');
-        closeIcon.classList.add('hidden');
-      } else {
-        sidebar.classList.replace('-translate-x-full', 'translate-x-0');
-        overlay.classList.remove('hidden');
-        menuIcon.classList.add('hidden');
-        closeIcon.classList.remove('hidden');
-      }
-    });
-
-    overlay.addEventListener('click', () => {
-      sidebar.classList.replace('translate-x-0', '-translate-x-full');
-      overlay.classList.add('hidden');
-      menuIcon.classList.remove('hidden');
-      closeIcon.classList.add('hidden');
-    });
-  </script>
-
-  <!-- Script Supabase -->
-  <script>
+    // Configuração Supabase
     const URL_SUPABASE = 'https://ulxbfffiidjlartupase.supabase.co';
     const KEY_SUPABASE = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVseGJmZmZpaWRqbGFydHVwYXNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwMDg5OTYsImV4cCI6MjA3MjU4NDk5Nn0.f3-wyXvWJtYR12sWD8bZNW0rFxmz-xq0BT8yuc8boWQ';
     const supabase = window.supabase.createClient(URL_SUPABASE, KEY_SUPABASE);
 
+    // 🔐 Verificar login
     async function verificarLoginDashboard() {
       const isLoggedIn = localStorage.getItem("isLoggedIn");
       const nomeUsuario = localStorage.getItem("nomeUsuario");
       const emailUsuario = localStorage.getItem("emailUsuario");
 
+      // Se não estiver logado → volta pro login
       if (!isLoggedIn || isLoggedIn !== "true") {
         window.location.href = "../cadastro/login.html";
         return;
       }
 
+      // Buscar nome no banco (opcional, caso queira mostrar saudação)
       let usuarioData = null;
       if (emailUsuario) {
         const { data, error } = await supabase
@@ -188,32 +161,120 @@
         if (!error && data) usuarioData = data;
       }
 
+      // Mostrar saudação (opcional)
       if (usuarioData && usuarioData.nome) {
-        document.getElementById("saudacaoUsuario").textContent = `Olá, ${usuarioData.nome} 👋`;
+        console.log(`Olá, ${usuarioData.nome} 👋`);
       } else if (nomeUsuario) {
-        document.getElementById("saudacaoUsuario").textContent = `Olá, ${nomeUsuario} 👋`;
+        console.log(`Olá, ${nomeUsuario} 👋`);
       }
     }
 
-    async function carregarDadosDashboard() {
-      try {
-        const [{ count: countUsuarios }, { count: countProdutos }] = await Promise.all([
-          supabase.from('usuario').select('*', { count: 'exact', head: true }),
-          supabase.from('item').select('*', { count: 'exact', head: true })
-        ]);
+    // Carregar categorias
+    async function carregarCategorias() {
+      const { data, error } = await supabase
+        .from('categoria')
+        .select('*')
+        .order('id_categoria', { ascending: true });
 
-        document.getElementById('qtdUsuarios').textContent = countUsuarios ?? 0;
-        document.getElementById('qtdProdutos').textContent = countProdutos ?? 0;
-      } catch (err) {
-        console.error("Erro ao carregar dados:", err);
+      if (error) {
+        console.error('Erro ao carregar categorias:', error);
+        alert('Erro ao carregar categorias');
+        return;
+      }
+
+      const tbody = document.getElementById('tabelaCategorias');
+      tbody.innerHTML = '';
+
+      data.forEach(c => {
+        const linha = document.createElement('tr');
+        linha.classList.add('hover:bg-yellow-50', 'transition');
+
+        linha.innerHTML = `
+          <td class="p-3">${c.id_categoria}</td>
+          <td class="p-3">${c.nome}</td>
+          <td class="p-3 text-center">
+            <button onclick="excluirCategoria(${c.id_categoria})"
+              class="bg-red-600 hover:bg-red-700 text-white py-1 px-4 rounded-full">Excluir</button>
+          </td>
+        `;
+        tbody.appendChild(linha);
+      });
+    }
+
+    // Adicionar categoria
+    document.getElementById('formCategoria').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const nome = document.getElementById('nomeCategoria').value.trim();
+
+      if (!nome) {
+        alert('Digite o nome da categoria.');
+        return;
+      }
+
+      const { error } = await supabase.from('categoria').insert([{ nome }]);
+
+      if (error) {
+        alert('Erro ao adicionar categoria: ' + error.message);
+      } else {
+        alert('Categoria adicionada com sucesso!');
+        document.getElementById('formCategoria').reset();
+        carregarCategorias();
+      }
+    });
+
+    // Excluir categoria
+    async function excluirCategoria(id) {
+      if (!confirm('Tem certeza que deseja excluir esta categoria?')) return;
+
+      const { error } = await supabase.from('categoria').delete().eq('id_categoria', id);
+
+      if (error) {
+        alert('Erro ao excluir: ' + error.message);
+      } else {
+        alert('Categoria excluída com sucesso!');
+        carregarCategorias();
       }
     }
 
+    // 🚀 Inicialização
     (async () => {
       await verificarLoginDashboard();
-      await carregarDadosDashboard();
+      await carregarCategorias();
     })();
   </script>
 
+
+  <script>
+  // Menu lateral mobile
+  const sidebar = document.getElementById('sidebar');
+  const menuBtn = document.getElementById('menuBtn');
+  const menuIcon = document.getElementById('menuIcon');
+  const closeIcon = document.getElementById('closeIcon');
+  const overlay = document.getElementById('overlay');
+
+  menuBtn.addEventListener('click', () => {
+    const isOpen = sidebar.classList.contains('translate-x-0');
+    if (isOpen) {
+      sidebar.classList.replace('translate-x-0', '-translate-x-full');
+      overlay.classList.add('hidden');
+      menuIcon.classList.remove('hidden');
+      closeIcon.classList.add('hidden');
+    } else {
+      sidebar.classList.replace('-translate-x-full', 'translate-x-0');
+      overlay.classList.remove('hidden');
+      menuIcon.classList.add('hidden');
+      closeIcon.classList.remove('hidden');
+    }
+  });
+
+  overlay.addEventListener('click', () => {
+    sidebar.classList.replace('translate-x-0', '-translate-x-full');
+    overlay.classList.add('hidden');
+    menuIcon.classList.remove('hidden');
+    closeIcon.classList.add('hidden');
+  });
+
+
+</script>
 </body>
 </html>

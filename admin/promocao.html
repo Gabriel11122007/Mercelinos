@@ -3,17 +3,79 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Gerenciar Promoções</title>
+  <title>PROMOÇÃO - Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="bg-amber-100 min-h-screen font-sans">
+<link rel="icon" type="image/png" href="Icon.jpg">
 
-  <header class="bg-yellow-700 text-white py-4 text-center text-xl font-bold shadow-md">
-    💸 Gerenciar Promoções
+
+<body class="bg-amber-100 flex h-screen">
+
+   <!-- Header (Mobile) -->
+  <header
+    class="fixed lg:hidden top-0 left-0 w-full bg-yellow-700 text-white flex items-center justify-between px-4 py-3 shadow-md z-40">
+    <button id="menuBtn" class="p-2 rounded-md focus:outline-none bg-yellow-800">
+      <svg id="menuIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
+        viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+      <svg id="closeIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden" fill="none"
+        viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+    <h1 class="font-semibold text-lg">Painel Administrativo</h1>
   </header>
 
-  <main class="p-6">
+  <!-- Overlay escurecido ao abrir o menu -->
+  <div id="overlay" class="hidden fixed inset-0 bg-black bg-opacity-40 z-30 transition-opacity"></div>
+
+  <!-- Sidebar -->
+  <aside id="sidebar"
+    class="fixed top-0 left-0 h-full w-64 bg-yellow-700 text-white flex flex-col justify-between shadow-lg transform -translate-x-full lg:translate-x-0 lg:static transition-transform duration-300 ease-in-out z-50">
+
+    <div>
+      <!-- Logo -->
+      <div class="bg-gray-200 text-black flex justify-center items-center h-28 relative">
+        <img src="https://via.placeholder.com/90x90.png?text=LOGO"
+          alt="Logo"
+          class="h-20 w-auto max-w-[90%] object-contain absolute inset-0 m-auto">
+      </div>
+
+      <!-- Navegação -->
+      <nav class="flex flex-col gap-2 p-4">
+        <a href="dashboard.html"
+          class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-full text-center transition">Home</a>
+        <a href="gerenciar-avaliacao.html"
+          class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-full text-center transition">Avaliação</a>
+        <a href="produtos.html"
+          class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-full text-center transition">Produtos</a>
+        <a href="usuarios.html"
+          class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-full text-center transition">Usuários</a>
+        <a href="promocao.html"
+          class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-full text-center transition">Promoção</a>
+        <a href="sobrenos.html"
+          class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-full text-center transition">Sobre Nós</a>
+        <a href="faq.html"
+          class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-full text-center transition">FAQ</a>
+        <a href="gerenciar-banners.html"
+          class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-full text-center transition">Banner</a>
+        <a href="categorias.html"
+          class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-full text-center transition">Categoria</a>
+      </nav>
+    </div>
+
+    <button id="logoutBtn"
+      class="m-4 bg-red-600 hover:bg-red-700 py-2 rounded-full text-center font-semibold transition">
+      Logout
+    </button>
+  </aside>
+
+
+<main class="flex-1 p-8 overflow-y-auto mt-16 lg:mt-0">
     <div class="flex items-center justify-between mb-4">
       <div>
         <label class="mr-2 font-medium text-yellow-800">Filtro:</label>
@@ -28,12 +90,76 @@
 
     <div id="containerProdutos" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
   </main>
+  
+    <!-- Script do menu lateral -->
+  <script>
+    const sidebar = document.getElementById('sidebar');
+    const menuBtn = document.getElementById('menuBtn');
+    const menuIcon = document.getElementById('menuIcon');
+    const closeIcon = document.getElementById('closeIcon');
+    const overlay = document.getElementById('overlay');
+
+    menuBtn.addEventListener('click', () => {
+      const isOpen = sidebar.classList.contains('translate-x-0');
+      if (isOpen) {
+        sidebar.classList.replace('translate-x-0', '-translate-x-full');
+        overlay.classList.add('hidden');
+        menuIcon.classList.remove('hidden');
+        closeIcon.classList.add('hidden');
+      } else {
+        sidebar.classList.replace('-translate-x-full', 'translate-x-0');
+        overlay.classList.remove('hidden');
+        menuIcon.classList.add('hidden');
+        closeIcon.classList.remove('hidden');
+      }
+    });
+
+    overlay.addEventListener('click', () => {
+      sidebar.classList.replace('translate-x-0', '-translate-x-full');
+      overlay.classList.add('hidden');
+      menuIcon.classList.remove('hidden');
+      closeIcon.classList.add('hidden');
+    });
+  </script>
+<script>
+  // Função de logout
+  function logout() {
+    // Remove os dados do usuário do localStorage
+    localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("emailUsuario");
+    localStorage.removeItem("nomeUsuario"); // se você estiver armazenando também
+
+    // Mensagem de confirmação
+    alert("Você saiu com sucesso!");
+
+    // Redireciona para a página de login
+    window.location.href = "../cadastro/login.html";
+  }
+
+  // Adiciona o evento ao botão de logout
+  const btnLogout = document.getElementById("logoutBtn");
+  if (btnLogout) {
+    btnLogout.addEventListener("click", logout);
+  }
+</script>
 
 <script>
   // === CONFIG SUPABASE ===
   const SUPABASE_URL = "https://ulxbfffiidjlartupase.supabase.co";
   const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVseGJmZmZpaWRqbGFydHVwYXNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwMDg5OTYsImV4cCI6MjA3MjU4NDk5Nn0.f3-wyXvWJtYR12sWD8bZNW0rFxmz-xq0BT8yuc8boWQ";
   const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  // === VERIFICAR LOGIN ===
+  async function verificarLoginDashboard() {
+    const isLoggedIn = localStorage.getItem("isLoggedIn");
+    if (!isLoggedIn || isLoggedIn !== "true") {
+      window.location.href = "../cadastro/login.html"; // Redireciona se não estiver logado
+      return;
+    }
+  }
+
+  // Chama a verificação ao carregar a página
+  verificarLoginDashboard();
 
   const container = document.getElementById("containerProdutos");
   const filtroEl = document.getElementById("filtro");
@@ -88,9 +214,11 @@
 
       card.innerHTML = `
         <div class="flex items-start gap-3">
-          <img src="${item.imagem || 'https://via.placeholder.com/120x80?text=Sem+Imagem'}"
-               alt="${escapeHtml(item.nome)}"
-               class="w-28 h-18 object-cover rounded-md flex-shrink-0">
+          <div class="w-32 h-32 flex-shrink-0 flex items-center justify-center overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
+            <img src="${item.imagem || 'https://via.placeholder.com/120x120?text=Sem+Imagem'}"
+                 alt="${escapeHtml(item.nome)}"
+                 class="object-cover w-full h-full">
+          </div>
           <div class="flex-1 min-w-0">
             <div class="flex justify-between items-start">
               <h3 class="text-sm font-semibold text-yellow-800 truncate">${escapeHtml(item.nome)}</h3>
@@ -134,7 +262,6 @@
         </div>
       `;
 
-      // Atualiza preço final dinamicamente
       const precoInput = card.querySelector(`#preco_${item.id_item}`);
       const descontoInput = card.querySelector(`#desconto_${item.id_item}`);
       const finalSpan = card.querySelector(`#final_${item.id_item}`);
@@ -152,96 +279,9 @@
     });
   }
 
-  // === SALVAR ALTERAÇÕES ===
-  async function salvarAlteracoes(id_item) {
-    const btn = document.getElementById(`salvarBtn_${id_item}`);
-    if (!btn) return;
+  filtroEl.addEventListener("change", carregarProdutos);
+  carregarProdutos();
 
-    btn.disabled = true;
-    const oldText = btn.innerHTML;
-    btn.innerHTML = "Salvando...";
-
-    try {
-      const precoEl = document.getElementById(`preco_${id_item}`);
-      const descontoEl = document.getElementById(`desconto_${id_item}`);
-
-      const preco = Number(precoEl.value);
-      const descontoPct = Number(descontoEl.value);
-
-      if (isNaN(preco) || preco <= 0) {
-        alert("Preço inválido. Informe um valor maior que 0.");
-        return;
-      }
-      if (isNaN(descontoPct) || descontoPct < 0 || descontoPct > 100) {
-        alert("Desconto deve estar entre 0 e 100.");
-        return;
-      }
-
-      const desconto = descontoPct / 100;
-
-      // Atualiza o preço do item
-      const { error: errAtualizaPreco } = await supabase
-        .from("item")
-        .update({ preco })
-        .eq("id_item", id_item);
-
-      if (errAtualizaPreco) throw errAtualizaPreco;
-
-      // Verifica se já existe promoção
-      const { data: existente, error: errExist } = await supabase
-        .from("promocao")
-        .select("id_promocao")
-        .eq("item_id", id_item)
-        .maybeSingle();
-
-      if (errExist) throw errExist;
-
-      if (existente && existente.id_promocao) {
-        // Atualiza promoção existente
-        const { error: errUpd } = await supabase
-          .from("promocao")
-          .update({ desconto })
-          .eq("item_id", id_item);
-        if (errUpd) throw errUpd;
-      } else {
-        // Cria nova promoção
-        const { error: errIns } = await supabase
-          .from("promocao")
-          .insert([{ item_id: id_item, desconto }]);
-        if (errIns) throw errIns;
-      }
-
-      mensagemGlobal.textContent = "✅ Salvo com sucesso!";
-      setTimeout(() => (mensagemGlobal.textContent = ""), 3000);
-      await carregarProdutos();
-    } catch (err) {
-      console.error("Erro ao salvar alterações:", err);
-      alert("Erro ao salvar. Veja console para detalhes.");
-    } finally {
-      const btnRest = document.getElementById(`salvarBtn_${id_item}`);
-      if (btnRest) {
-        btnRest.disabled = false;
-        btnRest.innerHTML = oldText;
-      }
-    }
-  }
-
-  // === REMOVER PROMOÇÃO ===
-  async function removerPromocao(id_promocao) {
-    if (!confirm("Deseja remover esta promoção?")) return;
-    try {
-      const { error } = await supabase.from("promocao").delete().eq("id_promocao", id_promocao);
-      if (error) throw error;
-      mensagemGlobal.textContent = "🗑️ Promoção removida!";
-      setTimeout(() => (mensagemGlobal.textContent = ""), 3000);
-      carregarProdutos();
-    } catch (err) {
-      console.error("Erro ao remover promoção:", err);
-      alert("Erro ao remover promoção. Veja console.");
-    }
-  }
-
-  // === UTILITÁRIO HTML SAFE ===
   function escapeHtml(str) {
     if (!str) return "";
     return String(str)
@@ -251,10 +291,7 @@
       .replaceAll('"', "&quot;")
       .replaceAll("'", "&#039;");
   }
-
-  // Eventos
-  filtroEl.addEventListener("change", carregarProdutos);
-  carregarProdutos();
 </script>
+
 </body>
 </html>

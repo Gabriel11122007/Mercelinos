@@ -255,20 +255,21 @@ async function loginUser(email, senha) {
     alert("Senha incorreta.");
     return;
   }
+  const usuarioId = localStorage.getItem("usuario_id");
 
-  // 🔹 Login bem-sucedido: salva informações do usuário no localStorage
-  localStorage.setItem("isLoggedIn", "true");
-  localStorage.setItem("nomeUsuario", usuario.nome);
-  localStorage.setItem("emailUsuario", usuario.email);
 
-  // 🔹 Exemplo: se quiser usar também o tipo
-  localStorage.setItem("tipoUsuario", usuario.tipo);
+// 🔹 Salvar dados do usuário no localStorage
+localStorage.setItem("isLoggedIn", "true");
+localStorage.setItem("usuario_id", usuario.id_usuario); // <- ESSENCIAL
+localStorage.setItem("nomeUsuario", usuario.nome);
+localStorage.setItem("emailUsuario", usuario.email);
+localStorage.setItem("tipoUsuario", usuario.tipo);
 
   // Redireciona conforme o tipo
   if (usuario.tipo === 'Administrador') {
     window.location.href = '../admin/dashboard.html';
   } else {
-    window.location.href = 'cliente.html';
+    window.location.href = 'clientelogado.html';
   }
 }
 
