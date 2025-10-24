@@ -4,10 +4,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gerenciar Avaliações</title>
+  <title>AVALIAÇÃO - Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
+<link rel="icon" type="image/png" href="Icon.jpg">
+
 
 <body class="bg-amber-100 flex h-screen font-sans">
 
@@ -138,6 +140,20 @@
         closeIcon.classList.add('hidden');
       }
     });
+  </script>
+
+    <!-- Logout -->
+  <script>
+    function logout() {
+      localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("emailUsuario");
+      localStorage.removeItem("nomeUsuario");
+      alert("Você saiu com sucesso!");
+      window.location.href = "../cadastro/login.html";
+    }
+
+    const btnLogout = document.getElementById("logoutBtn");
+    if (btnLogout) btnLogout.addEventListener("click", logout);
   </script>
 
   <!-- Script Supabase -->
