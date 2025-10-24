@@ -1,5 +1,0 @@
-    // Logout
-    document.getElementById("logoutBtn").addEventListener("click", () => {
-      localStorage.clear();
-      window.location.href = "../cadastro/login.html";
-    });
