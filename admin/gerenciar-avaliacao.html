@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gerenciar Avaliações</title>
+  <title>AVALIAÇÃO - Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -140,6 +140,29 @@
     });
   </script>
 
+  <script>
+  // Função de logout
+  function logout() {
+    // Remove os dados do usuário do localStorage
+    localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("emailUsuario");
+    localStorage.removeItem("nomeUsuario"); // se você estiver armazenando também
+
+    // Mensagem de confirmação
+    alert("Você saiu com sucesso!");
+
+    // Redireciona para a página de login
+    window.location.href = "../cadastro/login.html";
+  }
+
+  // Adiciona o evento ao botão de logout
+  const btnLogout = document.getElementById("logoutBtn");
+  if (btnLogout) {
+    btnLogout.addEventListener("click", logout);
+  }
+</script>
+  
+
   <!-- Script Supabase -->
   <script>
     const URL_SUPABASE = 'https://ulxbfffiidjlartupase.supabase.co';
@@ -158,6 +181,34 @@
       }
 
       renderizarTabela(data);
+    }
+
+
+    async function verificarLoginDashboard() {
+      const isLoggedIn = localStorage.getItem("isLoggedIn");
+      const nomeUsuario = localStorage.getItem("nomeUsuario");
+      const emailUsuario = localStorage.getItem("emailUsuario");
+
+      if (!isLoggedIn || isLoggedIn !== "true") {
+        window.location.href = "../cadastro/login.html";
+        return;
+      }
+
+      let usuarioData = null;
+      if (emailUsuario) {
+        const { data, error } = await supabase
+          .from("usuario")
+          .select("nome")
+          .eq("email", emailUsuario)
+          .single();
+        if (!error && data) usuarioData = data;
+      }
+
+      if (usuarioData && usuarioData.nome) {
+        document.getElementById("saudacaoUsuario").textContent = `Olá, ${usuarioData.nome} 👋`;
+      } else if (nomeUsuario) {
+        document.getElementById("saudacaoUsuario").textContent = `Olá, ${nomeUsuario} 👋`;
+      }
     }
 
     function renderizarTabela(avaliacoes) {
@@ -208,15 +259,10 @@
       }
     }
 
-    document.getElementById("logoutBtn").addEventListener("click", () => {
-      localStorage.clear();
-      alert("Você saiu com sucesso!");
-      window.location.href = "../cadastro/login.html";
-    });
-
     // Inicialização
     carregarAvaliacoes();
   </script>
+
 
 </body>
 </html>
