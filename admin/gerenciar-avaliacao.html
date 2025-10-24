@@ -166,118 +166,121 @@
   }
 </script>
 
+<script>
+const URL_SUPABASE = 'https://ulxbfffiidjlartupase.supabase.co';
+const KEY_SUPABASE = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVseGJmZmZpaWRqbGFydHVwYXNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwMDg5OTYsImV4cCI6MjA3MjU4NDk5Nn0.f3-wyXvWJtYR12sWD8bZNW0rFxmz-xq0BT8yuc8boWQ';
+const supabase = window.supabase.createClient(URL_SUPABASE, KEY_SUPABASE);
 
-  <!-- Supabase Script -->
-  <script>
-    const URL_SUPABASE = 'https://ulxbfffiidjlartupase.supabase.co';
-    const KEY_SUPABASE = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVseGJmZmZpaWRqbGFydHVwYXNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwMDg5OTYsImV4cCI6MjA3MjU4NDk5Nn0.f3-wyXvWJtYR12sWD8bZNW0rFxmz-xq0BT8yuc8boWQ';
-    const supabase = window.supabase.createClient(URL_SUPABASE, KEY_SUPABASE);
+// Verificação de login e admin
+async function verificarLoginAdmin() {
+  const isLoggedIn = localStorage.getItem("isLoggedIn");
+  const usuario = JSON.parse(localStorage.getItem("usuario")) || {};
 
-  // Função de verificação de login
-  async function verificarLoginDashboard() {
-    const isLoggedIn = localStorage.getItem("isLoggedIn");
-    if (!isLoggedIn || isLoggedIn !== "true") {
-      window.location.href = "../cadastro/login.html"; // redireciona se não estiver logado
-      return;
-    }
+  if (!isLoggedIn || isLoggedIn !== "true" || usuario.role !== "admin") {
+    alert("Você precisa estar logado como administrador para acessar esta página.");
+    window.location.href = "../cadastro/login.html";
+    return false;
+  }
+  return true;
+}
+
+// Carregar avaliações
+async function carregarAvaliacoes() {
+  const { data, error } = await supabase
+    .from("avaliacaocliente")
+    .select(`id_avaliacao, nota, comentario, data, usuario(nome)`)
+    .order("data", { ascending: false });
+
+  if (error) {
+    console.error("Erro ao carregar avaliações:", error);
+    return;
   }
 
-  // Chama a verificação ao carregar a página
-  verificarLoginDashboard();
+  renderizarTabela(data);
+  renderizarCardsMobile(data);
+}
 
-    async function carregarAvaliacoes() {
-      const { data, error } = await supabase
-        .from("avaliacaocliente")
-        .select(`id_avaliacao, nota, comentario, data, usuario(nome)`)
-        .order("data", { ascending: false });
+// Renderizar tabela desktop
+function renderizarTabela(avaliacoes) {
+  const tbody = document.getElementById("tabelaAvaliacoes");
+  tbody.innerHTML = "";
 
-      if (error) {
-        console.error("Erro ao carregar avaliações:", error);
-        return;
-      }
+  if (!avaliacoes || avaliacoes.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-gray-500">Nenhuma avaliação encontrada.</td></tr>`;
+    document.getElementById("mediaNotas").textContent = "0.0 ⭐";
+    return;
+  }
 
-      renderizarTabela(data);
-      renderizarCardsMobile(data);
-    }
+  const media = (avaliacoes.reduce((acc, a) => acc + (a.nota || 0), 0) / avaliacoes.length).toFixed(1);
+  document.getElementById("mediaNotas").textContent = `${media} ⭐`;
 
-    function renderizarTabela(avaliacoes) {
-      const tbody = document.getElementById("tabelaAvaliacoes");
-      tbody.innerHTML = "";
+  avaliacoes.forEach(av => {
+    const tr = document.createElement("tr");
+    tr.classList.add("hover:bg-amber-50", "transition");
 
-      if (!avaliacoes || avaliacoes.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-gray-500">Nenhuma avaliação encontrada.</td></tr>`;
-        document.getElementById("mediaNotas").textContent = "0.0 ⭐";
-        return;
-      }
+    tr.innerHTML = `
+      <td class="py-3 px-4 font-medium">${av.usuario?.nome || "Desconhecido"}</td>
+      <td class="py-3 px-4 text-center text-yellow-600 font-semibold">${"★".repeat(av.nota) + "☆".repeat(5 - av.nota)}</td>
+      <td class="py-3 px-4">${av.comentario || "-"}</td>
+      <td class="py-3 px-4 text-center">${new Date(av.data).toLocaleString("pt-BR")}</td>
+      <td class="py-3 px-4 text-center">
+        <button onclick="excluirAvaliacao(${av.id_avaliacao})" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md text-sm shadow transition transform hover:scale-105">Excluir</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
 
-      const media = (
-        avaliacoes.reduce((acc, a) => acc + (a.nota || 0), 0) / avaliacoes.length
-      ).toFixed(1);
-      document.getElementById("mediaNotas").textContent = `${media} ⭐`;
+// Renderizar cards mobile
+function renderizarCardsMobile(avaliacoes) {
+  const container = document.getElementById("tabelaAvaliacoesMobile");
+  container.innerHTML = "";
 
-      avaliacoes.forEach(av => {
-        const tr = document.createElement("tr");
-        tr.classList.add("hover:bg-amber-50", "transition");
+  if (!avaliacoes || avaliacoes.length === 0) {
+    container.innerHTML = `<p class="text-center py-4 text-gray-500">Nenhuma avaliação encontrada.</p>`;
+    return;
+  }
 
-        tr.innerHTML = `
-          <td class="py-3 px-4 font-medium">${av.usuario?.nome || "Desconhecido"}</td>
-          <td class="py-3 px-4 text-center text-yellow-600 font-semibold">${"★".repeat(av.nota) + "☆".repeat(5 - av.nota)}</td>
-          <td class="py-3 px-4">${av.comentario || "-"}</td>
-          <td class="py-3 px-4 text-center">${new Date(av.data).toLocaleString("pt-BR")}</td>
-          <td class="py-3 px-4 text-center">
-            <button onclick="excluirAvaliacao(${av.id_avaliacao})" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md text-sm shadow transition transform hover:scale-105">Excluir</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
+  avaliacoes.forEach(av => {
+    const card = document.createElement("div");
+    card.classList.add("bg-yellow-50", "p-4", "rounded-2xl", "shadow-md", "transition", "hover:scale-105");
 
-    function renderizarCardsMobile(avaliacoes) {
-      const container = document.getElementById("tabelaAvaliacoesMobile");
-      container.innerHTML = "";
+    card.innerHTML = `
+      <p class="font-semibold text-yellow-700 mb-1">${av.usuario?.nome || "Desconhecido"}</p>
+      <p class="text-yellow-600 font-bold mb-2">${"★".repeat(av.nota) + "☆".repeat(5 - av.nota)}</p>
+      <p class="mb-2 text-gray-800">${av.comentario || "-"}</p>
+      <p class="text-gray-500 text-sm mb-3">${new Date(av.data).toLocaleString("pt-BR")}</p>
+      <button onclick="excluirAvaliacao(${av.id_avaliacao})" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md text-sm shadow transition transform hover:scale-105 w-full">Excluir</button>
+    `;
+    container.appendChild(card);
+  });
+}
 
-      if (!avaliacoes || avaliacoes.length === 0) {
-        container.innerHTML = `<p class="text-center py-4 text-gray-500">Nenhuma avaliação encontrada.</p>`;
-        return;
-      }
+// Excluir avaliação
+async function excluirAvaliacao(id) {
+  if (!confirm("Tem certeza que deseja excluir esta avaliação?")) return;
 
-      avaliacoes.forEach(av => {
-        const card = document.createElement("div");
-        card.classList.add("bg-yellow-50", "p-4", "rounded-2xl", "shadow-md", "transition", "hover:scale-105");
+  const { error } = await supabase
+    .from("avaliacaocliente")
+    .delete()
+    .eq("id_avaliacao", id);
 
-        card.innerHTML = `
-          <p class="font-semibold text-yellow-700 mb-1">${av.usuario?.nome || "Desconhecido"}</p>
-          <p class="text-yellow-600 font-bold mb-2">${"★".repeat(av.nota) + "☆".repeat(5 - av.nota)}</p>
-          <p class="mb-2 text-gray-800">${av.comentario || "-"}</p>
-          <p class="text-gray-500 text-sm mb-3">${new Date(av.data).toLocaleString("pt-BR")}</p>
-          <button onclick="excluirAvaliacao(${av.id_avaliacao})" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md text-sm shadow transition transform hover:scale-105 w-full">Excluir</button>
-        `;
-        container.appendChild(card);
-      });
-    }
+  if (!error) {
+    alert("Avaliação excluída com sucesso!");
+    carregarAvaliacoes();
+  } else {
+    alert("Erro ao excluir avaliação.");
+  }
+}
 
-    async function excluirAvaliacao(id) {
-      if (!confirm("Tem certeza que deseja excluir esta avaliação?")) return;
+// Inicialização
+(async () => {
+  const logado = await verificarLoginAdmin();
+  if (logado) await carregarAvaliacoes();
+})();
 
-      const { error } = await supabase
-        .from("avaliacaocliente")
-        .delete()
-        .eq("id_avaliacao", id);
+</script>
 
-      if (!error) {
-        alert("Avaliação excluída com sucesso!");
-        carregarAvaliacoes();
-      } else {
-        alert("Erro ao excluir avaliação.");
-      }
-    }
-
-    // 🚀 Inicialização
-    (async () => {
-      await verificarLoginAdmin();
-      await carregarAvaliacoes();
-    })();
-  </script>
 
 </body>
 </html>
