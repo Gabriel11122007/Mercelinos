@@ -124,6 +124,38 @@
     }
   </script>
 
+
+  <!-- Script do menu lateral -->
+  <script>
+    const sidebar = document.getElementById('sidebar');
+    const menuBtn = document.getElementById('menuBtn');
+    const menuIcon = document.getElementById('menuIcon');
+    const closeIcon = document.getElementById('closeIcon');
+    const overlay = document.getElementById('overlay');
+
+    menuBtn.addEventListener('click', () => {
+      const isOpen = sidebar.classList.contains('translate-x-0');
+      if (isOpen) {
+        sidebar.classList.replace('translate-x-0', '-translate-x-full');
+        overlay.classList.add('hidden');
+        menuIcon.classList.remove('hidden');
+        closeIcon.classList.add('hidden');
+      } else {
+        sidebar.classList.replace('-translate-x-full', 'translate-x-0');
+        overlay.classList.remove('hidden');
+        menuIcon.classList.add('hidden');
+        closeIcon.classList.remove('hidden');
+      }
+    });
+
+    overlay.addEventListener('click', () => {
+      sidebar.classList.replace('translate-x-0', '-translate-x-full');
+      overlay.classList.add('hidden');
+      menuIcon.classList.remove('hidden');
+      closeIcon.classList.add('hidden');
+    });
+  </script>
+
   <!-- === SCRIPT PRINCIPAL === -->
   <script>
     const container = document.getElementById("containerProdutos");
@@ -254,34 +286,6 @@
         .replaceAll("'", "&#039;");
     }
 
-    // === MENU & LOGOUT ===
-    const sidebar = document.getElementById("sidebar");
-    const menuBtn = document.getElementById("menuBtn");
-    const menuIcon = document.getElementById("menuIcon");
-    const closeIcon = document.getElementById("closeIcon");
-    const overlay = document.getElementById("overlay");
-
-    menuBtn.addEventListener("click", () => {
-      const isOpen = sidebar.classList.contains("translate-x-0");
-      if (isOpen) {
-        sidebar.classList.replace("translate-x-0", "-translate-x-full");
-        overlay.classList.add("hidden");
-        menuIcon.classList.remove("hidden");
-        closeIcon.classList.add("hidden");
-      } else {
-        sidebar.classList.replace("-translate-x-full", "translate-x-0");
-        overlay.classList.remove("hidden");
-        menuIcon.classList.add("hidden");
-        closeIcon.classList.remove("hidden");
-      }
-    });
-
-    overlay.addEventListener("click", () => {
-      sidebar.classList.replace("translate-x-0", "-translate-x-full");
-      overlay.classList.add("hidden");
-      menuIcon.classList.remove("hidden");
-      closeIcon.classList.add("hidden");
-    });
 
     function logout() {
       localStorage.removeItem("isLoggedIn");

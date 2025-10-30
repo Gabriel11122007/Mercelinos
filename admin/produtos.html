@@ -11,7 +11,7 @@
 
 <body class="bg-amber-100 flex h-screen">
 
-  <!-- Header mobile -->
+  <!-- Header (Mobile) -->
   <header class="fixed lg:hidden top-0 left-0 w-full bg-yellow-700 text-white flex items-center justify-between px-4 py-3 shadow-md z-40">
     <button id="menuBtn" class="p-2 rounded-md focus:outline-none bg-yellow-800">
       <svg id="menuIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
@@ -28,6 +28,7 @@
     <h1 class="font-semibold text-lg">Painel Administrativo</h1>
   </header>
 
+  <!-- Overlay -->
   <div id="overlay" class="hidden fixed inset-0 bg-black bg-opacity-40 z-30 transition-opacity"></div>
 
   <!-- Sidebar -->
@@ -37,24 +38,35 @@
     <div>
       <!-- Logo -->
       <div class="flex justify-center items-center h-28 bg-yellow-800">
-        <img src="logo.jpg" alt="Logo" class="h-20 w-auto object-contain transition-transform duration-300 hover:scale-105 rounded-2xl" />
+        <img src="logo.jpg" alt="Logo"
+          class="h-20 w-auto object-contain transition-transform duration-300 hover:scale-105 rounded-2xl" />
       </div>
 
       <!-- Navegação -->
       <nav class="flex flex-col gap-3 p-5">
-        <a href="dashboard.html" class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">Home</a>
-        <a href="gerenciar-avaliacao.html" class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">Avaliação</a>
-        <a href="produtos.html" class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">Produtos</a>
-        <a href="usuarios.html" class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">Usuários</a>
-        <a href="promocao.html" class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">Promoção</a>
-        <a href="sobrenos.html" class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">Sobre Nós</a>
-        <a href="faq.html" class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">FAQ</a>
-        <a href="gerenciar-banners.html" class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">Banner</a>
-        <a href="categorias.html" class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">Categoria</a>
+        <a href="dashboard.html"
+          class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">Home</a>
+        <a href="gerenciar-avaliacao.html"
+          class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">Avaliação</a>
+        <a href="produtos.html"
+          class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">Produtos</a>
+        <a href="usuarios.html"
+          class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">Usuários</a>
+        <a href="promocao.html"
+          class="bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">Promoção</a>
+        <a href="sobrenos.html"
+          class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">Sobre Nós</a>
+        <a href="faq.html"
+          class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">FAQ</a>
+        <a href="gerenciar-banners.html"
+          class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">Banner</a>
+        <a href="categorias.html"
+          class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">Categoria</a>
       </nav>
     </div>
 
-    <button id="logoutBtn" class="m-4 bg-red-600 hover:bg-red-700 py-2 rounded-xl text-center font-semibold transition-all">
+    <button id="logoutBtn"
+      class="m-4 bg-red-600 hover:bg-red-700 py-2 rounded-xl text-center font-semibold transition-all">
       Logout
     </button>
   </aside>
@@ -126,6 +138,38 @@
       </table>
     </div>
   </main>
+
+
+    <!-- Script do menu lateral -->
+  <script>
+    const sidebar = document.getElementById('sidebar');
+    const menuBtn = document.getElementById('menuBtn');
+    const menuIcon = document.getElementById('menuIcon');
+    const closeIcon = document.getElementById('closeIcon');
+    const overlay = document.getElementById('overlay');
+
+    menuBtn.addEventListener('click', () => {
+      const isOpen = sidebar.classList.contains('translate-x-0');
+      if (isOpen) {
+        sidebar.classList.replace('translate-x-0', '-translate-x-full');
+        overlay.classList.add('hidden');
+        menuIcon.classList.remove('hidden');
+        closeIcon.classList.add('hidden');
+      } else {
+        sidebar.classList.replace('-translate-x-full', 'translate-x-0');
+        overlay.classList.remove('hidden');
+        menuIcon.classList.add('hidden');
+        closeIcon.classList.remove('hidden');
+      }
+    });
+
+    overlay.addEventListener('click', () => {
+      sidebar.classList.replace('translate-x-0', '-translate-x-full');
+      overlay.classList.add('hidden');
+      menuIcon.classList.remove('hidden');
+      closeIcon.classList.add('hidden');
+    });
+  </script>
 
   <!-- === SUPABASE E AUTENTICAÇÃO === -->
   <script>
