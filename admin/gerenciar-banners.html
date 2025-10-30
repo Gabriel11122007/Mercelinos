@@ -11,8 +11,7 @@
 
 <body class="bg-amber-100 flex h-screen font-sans">
   <!-- Header (Mobile) -->
-  <header
-    class="fixed lg:hidden top-0 left-0 w-full bg-yellow-700 text-white flex items-center justify-between px-4 py-3 shadow-md z-40">
+  <header class="fixed lg:hidden top-0 left-0 w-full bg-yellow-700 text-white flex items-center justify-between px-4 py-3 shadow-md z-40">
     <button id="menuBtn" class="p-2 rounded-md focus:outline-none bg-yellow-800">
       <svg id="menuIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
         viewBox="0 0 24 24" stroke="currentColor">
@@ -31,86 +30,80 @@
   <!-- Overlay escurecido ao abrir o menu -->
   <div id="overlay" class="hidden fixed inset-0 bg-black bg-opacity-40 z-30 transition-opacity"></div>
 
-<!-- Sidebar -->
-<aside id="sidebar"
-  class="fixed top-0 left-0 h-full w-64 bg-yellow-700 text-white flex flex-col justify-between shadow-xl transform -translate-x-full lg:translate-x-0 lg:static transition-transform duration-300 ease-in-out z-50">
+  <!-- Sidebar -->
+  <aside id="sidebar"
+    class="fixed top-0 left-0 h-full w-64 bg-yellow-700 text-white flex flex-col justify-between shadow-xl transform -translate-x-full lg:translate-x-0 lg:static transition-transform duration-300 ease-in-out z-50">
 
-  <div>
-    <!-- Logo -->
-    <div class="flex justify-center items-center h-28 bg-yellow-800">
-      <img 
-        src="logo.jpg" 
-        alt="Logo" 
-        class="h-20 w-auto object-contain transition-transform duration-300 hover:scale-105 rounded-2xl"
-      />
+    <div>
+      <!-- Logo -->
+      <div class="flex justify-center items-center h-28 bg-yellow-800">
+        <img 
+          src="logo.jpg" 
+          alt="Logo" 
+          class="h-20 w-auto object-contain transition-transform duration-300 hover:scale-105 rounded-2xl"
+        />
+      </div>
+
+      <!-- Navegação -->
+      <nav class="flex flex-col gap-3 p-5">
+        <a href="dashboard.html"
+          class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">Home</a>
+        <a href="gerenciar-avaliacao.html"
+          class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">Avaliação</a>
+        <a href="produtos.html"
+          class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">Produtos</a>
+        <a href="usuarios.html"
+          class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">Usuários</a>
+        <a href="promocao.html"
+          class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">Promoção</a>
+        <a href="sobrenos.html"
+          class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">Sobre Nós</a>
+        <a href="faq.html"
+          class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">FAQ</a>
+        <a href="gerenciar-banners.html"
+          class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">Banner</a>
+        <a href="categorias.html"
+          class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">Categoria</a>
+      </nav>
     </div>
 
-    <!-- Navegação -->
-    <nav class="flex flex-col gap-3 p-5">
-      <a href="dashboard.html"
-        class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">Home</a>
-      <a href="gerenciar-avaliacao.html"
-        class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">Avaliação</a>
-      <a href="produtos.html"
-        class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">Produtos</a>
-      <a href="usuarios.html"
-        class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">Usuários</a>
-      <a href="promocao.html"
-        class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">Promoção</a>
-      <a href="sobrenos.html"
-        class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">Sobre Nós</a>
-      <a href="faq.html"
-        class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">FAQ</a>
-      <a href="gerenciar-banners.html"
-        class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">Banner</a>
-      <a href="categorias.html"
-        class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">Categoria</a>
-    </nav>
-  </div>
-
-  <button id="logoutBtn"
-    class="m-4 bg-red-600 hover:bg-red-700 py-2 rounded-xl text-center font-semibold transition-all">
-    Logout
-  </button>
-</aside>
+    <button id="logoutBtn"
+      class="m-4 bg-red-600 hover:bg-red-700 py-2 rounded-xl text-center font-semibold transition-all">
+      Logout
+    </button>
+  </aside>
 
   <!-- Main -->
   <main class="flex-1 bg-amber-100 p-8 overflow-y-auto">
     <h1 class="text-3xl font-bold text-yellow-800 mb-8 text-center">🖼️ Gerenciar Banners</h1>
 
-<!-- Upload de Banner -->
-<section class="bg-white p-6 rounded-2xl shadow-lg max-w-md mx-auto mb-10">
-  <h2 class="text-2xl font-bold text-yellow-700 mb-6 text-center">Adicionar Novo Banner</h2>
+    <!-- Upload de Banner -->
+    <section class="bg-white p-6 rounded-2xl shadow-lg max-w-md mx-auto mb-10">
+      <h2 class="text-2xl font-bold text-yellow-700 mb-6 text-center">Adicionar Novo Banner</h2>
 
-  <form id="formBanner" class="flex flex-col gap-4">
+      <form id="formBanner" class="flex flex-col gap-4">
+        <input id="nome" type="text" placeholder="Nome do banner"
+               class="border border-gray-300 p-3 rounded-md focus:ring-2 focus:ring-yellow-600 focus:outline-none shadow-sm"
+               required>
 
-    <!-- Nome do Banner -->
-    <input id="nome" type="text" placeholder="Nome do banner"
-           class="border border-gray-300 p-3 rounded-md focus:ring-2 focus:ring-yellow-600 focus:outline-none shadow-sm"
-           required>
+        <select id="plataforma"
+                class="border border-gray-300 p-3 rounded-md focus:ring-2 focus:ring-yellow-600 focus:outline-none shadow-sm"
+                required>
+          <option value="">Selecione a plataforma</option>
+          <option value="Desktop">Desktop</option>
+          <option value="Mobile">Mobile</option>
+        </select>
 
-    <!-- Plataforma -->
-    <select id="plataforma"
-            class="border border-gray-300 p-3 rounded-md focus:ring-2 focus:ring-yellow-600 focus:outline-none shadow-sm"
-            required>
-      <option value="">Selecione a plataforma</option>
-      <option value="Desktop">Desktop</option>
-      <option value="Mobile">Mobile</option>
-    </select>
+        <input id="arquivo" type="file" accept="image/*"
+               class="border border-gray-300 p-2 rounded-md bg-gray-50 cursor-pointer focus:ring-2 focus:ring-yellow-600 shadow-sm"
+               required>
 
-    <!-- Upload do arquivo -->
-    <input id="arquivo" type="file" accept="image/*"
-           class="border border-gray-300 p-2 rounded-md bg-gray-50 cursor-pointer focus:ring-2 focus:ring-yellow-600 shadow-sm" required>
-
-    <!-- Botão -->
-    <button type="submit"
-            class="bg-yellow-700 text-white py-3 rounded-md hover:bg-yellow-800 transition-all font-semibold shadow-md">
-      Enviar Banner
-    </button>
-
-  </form>
-</section>
-
+        <button type="submit"
+                class="bg-yellow-700 text-white py-3 rounded-md hover:bg-yellow-800 transition-all font-semibold shadow-md">
+          Enviar Banner
+        </button>
+      </form>
+    </section>
 
     <!-- Lista -->
     <div class="overflow-x-auto bg-white rounded-2xl shadow-md p-4">
@@ -129,7 +122,7 @@
     </div>
   </main>
 
-    <!-- Script do menu lateral -->
+  <!-- === MENU LATERAL (SCRIPT) === -->
   <script>
     const sidebar = document.getElementById('sidebar');
     const menuBtn = document.getElementById('menuBtn');
@@ -160,47 +153,56 @@
     });
   </script>
 
-<script>
-  const URL_SUPABASE = 'https://ulxbfffiidjlartupase.supabase.co';
-  const KEY_SUPABASE = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVseGJmZmZpaWRqbGFydHVwYXNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwMDg5OTYsImV4cCI6MjA3MjU4NDk5Nn0.f3-wyXvWJtYR12sWD8bZNW0rFxmz-xq0BT8yuc8boWQ'; // sua key
-  const supabase = window.supabase.createClient(URL_SUPABASE, KEY_SUPABASE);
+    <!-- === VERIFICAR LOGIN ADMIN === -->
+  <script>
+    async function verificarLoginDashboard() {
+      const isLoggedIn = localStorage.getItem("isLoggedIn");
+      const emailUsuario = localStorage.getItem("emailUsuario");
 
-  // Função de verificação de login
-  async function verificarLoginDashboard() {
-    const isLoggedIn = localStorage.getItem("isLoggedIn");
-    if (!isLoggedIn || isLoggedIn !== "true") {
-      window.location.href = "../cadastro/login.html"; // redireciona se não estiver logado
-      return;
+      if (!isLoggedIn || isLoggedIn !== "true") {
+        window.location.href = "../cadastro/login.html";
+        return;
+      }
+
+      if (emailUsuario) {
+        const { data: usuarioData, error } = await supabase
+          .from("usuario")
+          .select("tipo, nome, senha")
+          .eq("email", emailUsuario)
+          .single();
+
+        if (error || !usuarioData || usuarioData.tipo !== "Administrador") {
+          alert("Acesso negado. Apenas administradores podem acessar.");
+          window.location.href = "../cadastro/login.html";
+          return;
+        }
+
+        window.adminData = usuarioData;
+      }
     }
-  }
+  </script>
 
-  // Chama a verificação ao carregar a página
-  verificarLoginDashboard();
-</script>
+  <!-- === SUPABASE E VERIFICAÇÃO DE ADMIN === -->
+  <script>
+    const URL_SUPABASE = 'https://ulxbfffiidjlartupase.supabase.co';
+    const KEY_SUPABASE = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVseGJmZmZpaWRqbGFydHVwYXNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwMDg5OTYsImV4cCI6MjA3MjU4NDk5Nn0.f3-wyXvWJtYR12sWD8bZNW0rFxmz-xq0BT8yuc8boWQ';
+    const supabase = window.supabase.createClient(URL_SUPABASE, KEY_SUPABASE);
+  </script>
 
-<script>
-  // Função de logout
-  function logout() {
-    // Remove os dados do usuário do localStorage
-    localStorage.removeItem("isLoggedIn");
-    localStorage.removeItem("emailUsuario");
-    localStorage.removeItem("nomeUsuario"); // se você estiver armazenando também
+  <!-- === LOGOUT === -->
+  <script>
+    function logout() {
+      localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("emailUsuario");
+      localStorage.removeItem("nomeUsuario");
 
-    // Mensagem de confirmação
-    alert("Você saiu com sucesso!");
+      alert("Você saiu com sucesso!");
+      window.location.href = "../cadastro/login.html";
+    }
 
-    // Redireciona para a página de login
-    window.location.href = "../cadastro/login.html";
-  }
-
-  // Adiciona o evento ao botão de logout
-  const btnLogout = document.getElementById("logoutBtn");
-  if (btnLogout) {
-    btnLogout.addEventListener("click", logout);
-  }
-</script>
-
-
+    const btnLogout = document.getElementById("logoutBtn");
+    if (btnLogout) btnLogout.addEventListener("click", logout);
+  </script>
 
 </body>
 </html>

@@ -163,137 +163,152 @@
     });
   </script>
 
-  <!-- Script Supabase -->
-  <script>
-    const URL_SUPABASE = 'https://ulxbfffiidjlartupase.supabase.co';
-    const KEY_SUPABASE = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVseGJmZmZpaWRqbGFydHVwYXNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwMDg5OTYsImV4cCI6MjA3MjU4NDk5Nn0.f3-wyXvWJtYR12sWD8bZNW0rFxmz-xq0BT8yuc8boWQ';
-    const supabase = window.supabase.createClient(URL_SUPABASE, KEY_SUPABASE);
+<script>
+  const URL_SUPABASE = 'https://ulxbfffiidjlartupase.supabase.co';
+  const KEY_SUPABASE = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVseGJmZmZpaWRqbGFydHVwYXNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwMDg5OTYsImV4cCI6MjA3MjU4NDk5Nn0.f3-wyXvWJtYR12sWD8bZNW0rFxmz-xq0BT8yuc8boWQ';
+  const supabase = window.supabase.createClient(URL_SUPABASE, KEY_SUPABASE);
 
-    const faqContainer = document.getElementById("faqContainer");
-    const formAddFAQ = document.getElementById("formAddFAQ");
+  const faqContainer = document.getElementById("faqContainer");
+  const formAddFAQ = document.getElementById("formAddFAQ");
 
-    // 🔐 Verificar login
-    async function verificarLoginDashboard() {
-      const isLoggedIn = localStorage.getItem("isLoggedIn");
-      const nomeUsuario = localStorage.getItem("nomeUsuario");
-      const emailUsuario = localStorage.getItem("emailUsuario");
+  // 🔐 Verificar login + administrador
+  async function verificarLoginDashboard() {
+    const isLoggedIn = localStorage.getItem("isLoggedIn");
+    const nomeUsuario = localStorage.getItem("nomeUsuario");
+    const emailUsuario = localStorage.getItem("emailUsuario");
 
-      if (!isLoggedIn || isLoggedIn !== "true") {
+    // Se não estiver logado → volta pro login
+    if (!isLoggedIn || isLoggedIn !== "true") {
+      window.location.href = "../cadastro/login.html";
+      return false;
+    }
+
+    // Busca usuário no banco
+    if (emailUsuario) {
+      const { data: usuarioData, error } = await supabase
+        .from("usuario")
+        .select("tipo, nome")
+        .eq("email", emailUsuario)
+        .single();
+
+      // Se erro ou não encontrado
+      if (error || !usuarioData) {
+        console.error("Erro ao buscar usuário:", error);
         window.location.href = "../cadastro/login.html";
         return false;
       }
 
-      let usuarioData = null;
-      if (emailUsuario) {
-        const { data, error } = await supabase
-          .from("usuario")
-          .select("nome")
-          .eq("email", emailUsuario)
-          .single();
-        if (!error && data) usuarioData = data;
+      // 🚫 Se não for administrador, bloqueia o acesso
+      if (usuarioData.tipo !== "Administrador") {
+        alert("Acesso negado. Somente administradores podem acessar esta página.");
+        window.location.href = "../cadastro/login.html";
+        return false;
       }
 
-      if (usuarioData && usuarioData.nome) {
-        document.getElementById("saudacaoUsuario").textContent = `Olá, ${usuarioData.nome} 👋`;
-      } else if (nomeUsuario) {
-        document.getElementById("saudacaoUsuario").textContent = `Olá, ${nomeUsuario} 👋`;
+      // ✅ Saudação personalizada
+      const saudacao = document.getElementById("saudacaoUsuario");
+      if (saudacao) {
+        saudacao.textContent = `Olá, ${usuarioData.nome || nomeUsuario || "Administrador"} 👋`;
       }
-      return true;
     }
 
-    // === Função: Carregar FAQs ===
-    async function carregarFAQs() {
-      faqContainer.innerHTML = "<p class='text-gray-600'>Carregando...</p>";
-      const { data, error } = await supabase.from("faq").select("*").order("id_question", { ascending: true });
+    return true;
+  }
 
-      if (error) {
-        faqContainer.innerHTML = `<p class='text-red-600'>Erro ao carregar FAQs.</p>`;
-        return;
-      }
+  // === Função: Carregar FAQs ===
+  async function carregarFAQs() {
+    faqContainer.innerHTML = "<p class='text-gray-600'>Carregando...</p>";
+    const { data, error } = await supabase.from("faq").select("*").order("id_question", { ascending: true });
 
-      if (data.length === 0) {
-        faqContainer.innerHTML = `<p class='text-gray-700 italic'>Nenhuma pergunta cadastrada ainda.</p>`;
-        return;
-      }
+    if (error) {
+      faqContainer.innerHTML = `<p class='text-red-600'>Erro ao carregar FAQs.</p>`;
+      return;
+    }
 
-      faqContainer.innerHTML = "";
-      data.forEach(faq => {
-        const card = document.createElement("div");
-        card.className = "bg-yellow-200 p-4 rounded-lg shadow-md flex flex-col gap-2";
+    if (data.length === 0) {
+      faqContainer.innerHTML = `<p class='text-gray-700 italic'>Nenhuma pergunta cadastrada ainda.</p>`;
+      return;
+    }
 
-        card.innerHTML = `
-          <div class="flex justify-between items-center">
-            <h3 class="text-lg font-semibold text-yellow-900">${faq.question}</h3>
-            <div class="flex gap-2">
-              <button class="editar bg-blue-600 text-white px-3 py-1 rounded-full hover:bg-blue-700" data-id="${faq.id_question}">Editar</button>
-              <button class="excluir bg-red-600 text-white px-3 py-1 rounded-full hover:bg-red-700" data-id="${faq.id_question}">Excluir</button>
-            </div>
+    faqContainer.innerHTML = "";
+    data.forEach(faq => {
+      const card = document.createElement("div");
+      card.className = "bg-yellow-200 p-4 rounded-lg shadow-md flex flex-col gap-2";
+
+      card.innerHTML = `
+        <div class="flex justify-between items-center">
+          <h3 class="text-lg font-semibold text-yellow-900">${faq.question}</h3>
+          <div class="flex gap-2">
+            <button class="editar bg-blue-600 text-white px-3 py-1 rounded-full hover:bg-blue-700" data-id="${faq.id_question}">Editar</button>
+            <button class="excluir bg-red-600 text-white px-3 py-1 rounded-full hover:bg-red-700" data-id="${faq.id_question}">Excluir</button>
           </div>
-          <p class="text-black">${faq.answer}</p>
-        `;
-        faqContainer.appendChild(card);
-      });
-
-      adicionarEventosBotoes();
-    }
-
-    // === Adicionar FAQ ===
-    formAddFAQ.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const question = document.getElementById("novaPergunta").value.trim();
-      const answer = document.getElementById("novaResposta").value.trim();
-
-      if (!question || !answer) {
-        alert("Preencha todos os campos!");
-        return;
-      }
-
-      const { error } = await supabase.from("faq").insert([{ question, answer }]);
-      if (error) {
-        alert("Erro ao adicionar FAQ!");
-        return;
-      }
-
-      formAddFAQ.reset();
-      carregarFAQs();
+        </div>
+        <p class="text-black">${faq.answer}</p>
+      `;
+      faqContainer.appendChild(card);
     });
 
-    // === Editar / Excluir ===
-    function adicionarEventosBotoes() {
-      document.querySelectorAll(".editar").forEach(btn => {
-        btn.addEventListener("click", async () => {
-          const id = btn.dataset.id;
-          const pergunta = prompt("Nova pergunta:");
-          const resposta = prompt("Nova resposta:");
-          if (pergunta && resposta) {
-            const { error } = await supabase
-              .from("faq")
-              .update({ question: pergunta, answer: resposta })
-              .eq("id_question", id);
-            if (error) alert("Erro ao editar FAQ!");
-            else carregarFAQs();
-          }
-        });
-      });
+    adicionarEventosBotoes();
+  }
 
-      document.querySelectorAll(".excluir").forEach(btn => {
-        btn.addEventListener("click", async () => {
-          const id = btn.dataset.id;
-          if (confirm("Tem certeza que deseja excluir esta FAQ?")) {
-            const { error } = await supabase.from("faq").delete().eq("id_question", id);
-            if (error) alert("Erro ao excluir FAQ!");
-            else carregarFAQs();
-          }
-        });
-      });
+  // === Adicionar FAQ ===
+  formAddFAQ.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const question = document.getElementById("novaPergunta").value.trim();
+    const answer = document.getElementById("novaResposta").value.trim();
+
+    if (!question || !answer) {
+      alert("Preencha todos os campos!");
+      return;
     }
 
-    // 🚀 Inicialização
-    (async () => {
-      const logado = await verificarLoginDashboard();
-      if (logado) await carregarFAQs();
-    })();
-  </script>
+    const { error } = await supabase.from("faq").insert([{ question, answer }]);
+    if (error) {
+      alert("Erro ao adicionar FAQ!");
+      return;
+    }
+
+    formAddFAQ.reset();
+    carregarFAQs();
+  });
+
+  // === Editar / Excluir ===
+  function adicionarEventosBotoes() {
+    document.querySelectorAll(".editar").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const id = btn.dataset.id;
+        const pergunta = prompt("Nova pergunta:");
+        const resposta = prompt("Nova resposta:");
+        if (pergunta && resposta) {
+          const { error } = await supabase
+            .from("faq")
+            .update({ question: pergunta, answer: resposta })
+            .eq("id_question", id);
+          if (error) alert("Erro ao editar FAQ!");
+          else carregarFAQs();
+        }
+      });
+    });
+
+    document.querySelectorAll(".excluir").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const id = btn.dataset.id;
+        if (confirm("Tem certeza que deseja excluir esta FAQ?")) {
+          const { error } = await supabase.from("faq").delete().eq("id_question", id);
+          if (error) alert("Erro ao excluir FAQ!");
+          else carregarFAQs();
+        }
+      });
+    });
+  }
+
+  // 🚀 Inicialização
+  (async () => {
+    const logado = await verificarLoginDashboard();
+    if (logado) await carregarFAQs();
+  })();
+</script>
+
 
 </body>
 </html>

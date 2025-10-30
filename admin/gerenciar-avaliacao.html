@@ -8,53 +8,51 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
+<link rel="icon" type="image/png" href="Icon.jpg">
 
 <body class="bg-amber-100 flex h-screen font-sans">
 
-<!-- Sidebar -->
-<aside id="sidebar"
-  class="fixed top-0 left-0 h-full w-64 bg-yellow-700 text-white flex flex-col justify-between shadow-xl transform -translate-x-full lg:translate-x-0 lg:static transition-transform duration-300 ease-in-out z-50">
+  <!-- Sidebar -->
+  <aside id="sidebar"
+    class="fixed top-0 left-0 h-full w-64 bg-yellow-700 text-white flex flex-col justify-between shadow-xl transform -translate-x-full lg:translate-x-0 lg:static transition-transform duration-300 ease-in-out z-50">
 
-  <div>
-    <!-- Logo -->
-    <div class="flex justify-center items-center h-28 bg-yellow-800">
-      <img 
-        src="logo.jpg" 
-        alt="Logo" 
-        class="h-20 w-auto object-contain transition-transform duration-300 hover:scale-105 rounded-2xl"
-      />
+    <div>
+      <!-- Logo -->
+      <div class="flex justify-center items-center h-28 bg-yellow-800">
+        <img src="logo.jpg" alt="Logo"
+          class="h-20 w-auto object-contain transition-transform duration-300 hover:scale-105 rounded-2xl" />
+      </div>
+
+      <!-- Navegação -->
+      <nav class="flex flex-col gap-3 p-5">
+        <a href="dashboard.html"
+          class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">Home</a>
+        <a href="gerenciar-avaliacao.html"
+          class="bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">Avaliação</a>
+        <a href="produtos.html"
+          class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">Produtos</a>
+        <a href="usuarios.html"
+          class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">Usuários</a>
+        <a href="promocao.html"
+          class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">Promoção</a>
+        <a href="sobrenos.html"
+          class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">Sobre Nós</a>
+        <a href="faq.html"
+          class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">FAQ</a>
+        <a href="gerenciar-banners.html"
+          class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">Banner</a>
+        <a href="categorias.html"
+          class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">Categoria</a>
+      </nav>
     </div>
 
-    <!-- Navegação -->
-    <nav class="flex flex-col gap-3 p-5">
-      <a href="dashboard.html"
-        class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">Home</a>
-      <a href="gerenciar-avaliacao.html"
-        class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">Avaliação</a>
-      <a href="produtos.html"
-        class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">Produtos</a>
-      <a href="usuarios.html"
-        class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">Usuários</a>
-      <a href="promocao.html"
-        class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">Promoção</a>
-      <a href="sobrenos.html"
-        class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">Sobre Nós</a>
-      <a href="faq.html"
-        class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">FAQ</a>
-      <a href="gerenciar-banners.html"
-        class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">Banner</a>
-      <a href="categorias.html"
-        class="bg-yellow-800 hover:bg-yellow-900 py-2 px-3 rounded-xl text-center font-medium transition-all">Categoria</a>
-    </nav>
-  </div>
+    <button id="logoutBtn"
+      class="m-4 bg-red-600 hover:bg-red-700 py-2 rounded-xl text-center font-semibold transition-all">
+      Logout
+    </button>
+  </aside>
 
-  <button id="logoutBtn"
-    class="m-4 bg-red-600 hover:bg-red-700 py-2 rounded-xl text-center font-semibold transition-all">
-    Logout
-  </button>
-</aside>
-
-  <!-- Overlay para mobile -->
+  <!-- Overlay (Mobile) -->
   <div id="overlay" class="hidden fixed inset-0 bg-black bg-opacity-40 z-40 transition-opacity"></div>
 
   <!-- Header Mobile -->
@@ -80,7 +78,8 @@
     <h1 class="text-3xl lg:text-4xl font-bold text-yellow-800 mb-6 lg:mb-10 text-center">📊 Gerenciar Avaliações</h1>
 
     <!-- Média Geral -->
-    <div class="bg-yellow-600 text-black rounded-3xl p-6 lg:p-8 mb-8 shadow-md max-w-md mx-auto text-center transition-transform hover:scale-105">
+    <div
+      class="bg-yellow-600 text-black rounded-3xl p-6 lg:p-8 mb-8 shadow-md max-w-md mx-auto text-center transition-transform hover:scale-105">
       <h2 class="text-2xl lg:text-3xl font-semibold">Média Geral</h2>
       <p id="mediaNotas" class="text-4xl lg:text-5xl font-bold mt-2">0.0 ⭐</p>
     </div>
@@ -102,75 +101,44 @@
     </div>
   </main>
 
-  <!-- Script do menu lateral -->
+  <!-- === CONFIG SUPABASE === -->
   <script>
-    const sidebar = document.getElementById('sidebar');
-    const menuBtn = document.getElementById('menuBtn');
-    const menuIcon = document.getElementById('menuIcon');
-    const closeIcon = document.getElementById('closeIcon');
-    const overlay = document.getElementById('overlay');
-
-    menuBtn.addEventListener('click', () => {
-      const aberto = sidebar.classList.contains('translate-x-0');
-      if (aberto) {
-        sidebar.classList.replace('translate-x-0', '-translate-x-full');
-        overlay.classList.add('hidden');
-        menuIcon.classList.remove('hidden');
-        closeIcon.classList.add('hidden');
-      } else {
-        sidebar.classList.replace('-translate-x-full', 'translate-x-0');
-        overlay.classList.remove('hidden');
-        menuIcon.classList.add('hidden');
-        closeIcon.classList.remove('hidden');
-      }
-    });
-
-    overlay.addEventListener('click', () => {
-      sidebar.classList.replace('translate-x-0', '-translate-x-full');
-      overlay.classList.add('hidden');
-      menuIcon.classList.remove('hidden');
-      closeIcon.classList.add('hidden');
-    });
-
-    window.addEventListener("resize", () => {
-      if (window.innerWidth >= 1024) {
-        sidebar.classList.add("translate-x-0");
-        overlay.classList.add("hidden");
-        menuIcon.classList.remove('hidden');
-        closeIcon.classList.add('hidden');
-      }
-    });
+    const SUPABASE_URL = "https://ulxbfffiidjlartupase.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVseGJmZmZpaWRqbGFydHVwYXNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwMDg5OTYsImV4cCI6MjA3MjU4NDk5Nn0.f3-wyXvWJtYR12sWD8bZNW0rFxmz-xq0BT8yuc8boWQ";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   </script>
 
+  <!-- === VERIFICAR LOGIN ADMIN === -->
   <script>
-  // Função de logout
-  function logout() {
-    // Remove os dados do usuário do localStorage
-    localStorage.removeItem("isLoggedIn");
-    localStorage.removeItem("emailUsuario");
-    localStorage.removeItem("nomeUsuario"); // se você estiver armazenando também
+    async function verificarLoginDashboard() {
+      const isLoggedIn = localStorage.getItem("isLoggedIn");
+      const emailUsuario = localStorage.getItem("emailUsuario");
 
-    // Mensagem de confirmação
-    alert("Você saiu com sucesso!");
+      if (!isLoggedIn || isLoggedIn !== "true") {
+        window.location.href = "../cadastro/login.html";
+        return;
+      }
 
-    // Redireciona para a página de login
-    window.location.href = "../cadastro/login.html";
-  }
+      if (emailUsuario) {
+        const { data: usuarioData, error } = await supabase
+          .from("usuario")
+          .select("tipo, nome, senha")
+          .eq("email", emailUsuario)
+          .single();
 
-  // Adiciona o evento ao botão de logout
-  const btnLogout = document.getElementById("logoutBtn");
-  if (btnLogout) {
-    btnLogout.addEventListener("click", logout);
-  }
-</script>
-  
+        if (error || !usuarioData || usuarioData.tipo !== "Administrador") {
+          alert("Acesso negado. Apenas administradores podem acessar.");
+          window.location.href = "../cadastro/login.html";
+          return;
+        }
 
-  <!-- Script Supabase -->
+        window.adminData = usuarioData;
+      }
+    }
+  </script>
+
+  <!-- === CARREGAR AVALIAÇÕES === -->
   <script>
-    const URL_SUPABASE = 'https://ulxbfffiidjlartupase.supabase.co';
-    const KEY_SUPABASE = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVseGJmZmZpaWRqbGFydHVwYXNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwMDg5OTYsImV4cCI6MjA3MjU4NDk5Nn0.f3-wyXvWJtYR12sWD8bZNW0rFxmz-xq0BT8yuc8boWQ';
-    const supabase = window.supabase.createClient(URL_SUPABASE, KEY_SUPABASE);
-
     async function carregarAvaliacoes() {
       const { data, error } = await supabase
         .from("avaliacaocliente")
@@ -183,34 +151,6 @@
       }
 
       renderizarTabela(data);
-    }
-
-
-    async function verificarLoginDashboard() {
-      const isLoggedIn = localStorage.getItem("isLoggedIn");
-      const nomeUsuario = localStorage.getItem("nomeUsuario");
-      const emailUsuario = localStorage.getItem("emailUsuario");
-
-      if (!isLoggedIn || isLoggedIn !== "true") {
-        window.location.href = "../cadastro/login.html";
-        return;
-      }
-
-      let usuarioData = null;
-      if (emailUsuario) {
-        const { data, error } = await supabase
-          .from("usuario")
-          .select("nome")
-          .eq("email", emailUsuario)
-          .single();
-        if (!error && data) usuarioData = data;
-      }
-
-      if (usuarioData && usuarioData.nome) {
-        document.getElementById("saudacaoUsuario").textContent = `Olá, ${usuarioData.nome} 👋`;
-      } else if (nomeUsuario) {
-        document.getElementById("saudacaoUsuario").textContent = `Olá, ${nomeUsuario} 👋`;
-      }
     }
 
     function renderizarTabela(avaliacoes) {
@@ -234,7 +174,7 @@
 
         tr.innerHTML = `
           <td class="py-3 px-4 font-medium">${av.usuario?.nome || "Desconhecido"}</td>
-          <td class="py-3 px-4 text-center text-yellow-600 font-semibold">${"★".repeat(av.nota)+"☆".repeat(5-av.nota)}</td>
+          <td class="py-3 px-4 text-center text-yellow-600 font-semibold">${"★".repeat(av.nota) + "☆".repeat(5 - av.nota)}</td>
           <td class="py-3 px-4">${av.comentario || "-"}</td>
           <td class="py-3 px-4 text-center">${new Date(av.data).toLocaleString("pt-BR")}</td>
           <td class="py-3 px-4 text-center">
@@ -261,10 +201,51 @@
       }
     }
 
-    // Inicialização
-    carregarAvaliacoes();
+    // === INICIALIZAÇÃO ===
+    verificarLoginDashboard().then(() => carregarAvaliacoes());
   </script>
 
+  <!-- === MENU E LOGOUT === -->
+  <script>
+    const sidebar = document.getElementById("sidebar");
+    const menuBtn = document.getElementById("menuBtn");
+    const menuIcon = document.getElementById("menuIcon");
+    const closeIcon = document.getElementById("closeIcon");
+    const overlay = document.getElementById("overlay");
+
+    menuBtn.addEventListener("click", () => {
+      const isOpen = sidebar.classList.contains("translate-x-0");
+      if (isOpen) {
+        sidebar.classList.replace("translate-x-0", "-translate-x-full");
+        overlay.classList.add("hidden");
+        menuIcon.classList.remove("hidden");
+        closeIcon.classList.add("hidden");
+      } else {
+        sidebar.classList.replace("-translate-x-full", "translate-x-0");
+        overlay.classList.remove("hidden");
+        menuIcon.classList.add("hidden");
+        closeIcon.classList.remove("hidden");
+      }
+    });
+
+    overlay.addEventListener("click", () => {
+      sidebar.classList.replace("translate-x-0", "-translate-x-full");
+      overlay.classList.add("hidden");
+      menuIcon.classList.remove("hidden");
+      closeIcon.classList.add("hidden");
+    });
+
+    // === LOGOUT ===
+    function logout() {
+      localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("emailUsuario");
+      localStorage.removeItem("nomeUsuario");
+      alert("Você saiu com sucesso!");
+      window.location.href = "../cadastro/login.html";
+    }
+
+    document.getElementById("logoutBtn").addEventListener("click", logout);
+  </script>
 
 </body>
 </html>

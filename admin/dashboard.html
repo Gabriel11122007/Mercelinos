@@ -164,58 +164,77 @@
     });
   </script>
 
-  <!-- Script Supabase -->
-  <script>
-    const URL_SUPABASE = 'https://ulxbfffiidjlartupase.supabase.co';
-    const KEY_SUPABASE = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVseGJmZmZpaWRqbGFydHVwYXNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwMDg5OTYsImV4cCI6MjA3MjU4NDk5Nn0.f3-wyXvWJtYR12sWD8bZNW0rFxmz-xq0BT8yuc8boWQ';
-    const supabase = window.supabase.createClient(URL_SUPABASE, KEY_SUPABASE);
+<script>
+  const URL_SUPABASE = 'https://ulxbfffiidjlartupase.supabase.co';
+  const KEY_SUPABASE = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVseGJmZmZpaWRqbGFydHVwYXNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwMDg5OTYsImV4cCI6MjA3MjU4NDk5Nn0.f3-wyXvWJtYR12sWD8bZNW0rFxmz-xq0BT8yuc8boWQ';
+  const supabase = window.supabase.createClient(URL_SUPABASE, KEY_SUPABASE);
 
-    async function verificarLoginDashboard() {
-      const isLoggedIn = localStorage.getItem("isLoggedIn");
-      const nomeUsuario = localStorage.getItem("nomeUsuario");
-      const emailUsuario = localStorage.getItem("emailUsuario");
+  async function verificarLoginDashboard() {
+    const isLoggedIn = localStorage.getItem("isLoggedIn");
+    const nomeUsuario = localStorage.getItem("nomeUsuario");
+    const emailUsuario = localStorage.getItem("emailUsuario");
 
-      if (!isLoggedIn || isLoggedIn !== "true") {
-        window.location.href = "../cadastro/login.html";
-        return;
-      }
-
-      let usuarioData = null;
-      if (emailUsuario) {
-        const { data, error } = await supabase
-          .from("usuario")
-          .select("nome")
-          .eq("email", emailUsuario)
-          .single();
-        if (!error && data) usuarioData = data;
-      }
-
-      if (usuarioData && usuarioData.nome) {
-        document.getElementById("saudacaoUsuario").textContent = `Olá, ${usuarioData.nome} 👋`;
-      } else if (nomeUsuario) {
-        document.getElementById("saudacaoUsuario").textContent = `Olá, ${nomeUsuario} 👋`;
-      }
+    // Se não estiver logado → volta pro login
+    if (!isLoggedIn || isLoggedIn !== "true") {
+      window.location.href = "../cadastro/login.html";
+      return false;
     }
 
-    async function carregarDadosDashboard() {
-      try {
-        const [{ count: countUsuarios }, { count: countProdutos }] = await Promise.all([
-          supabase.from('usuario').select('*', { count: 'exact', head: true }),
-          supabase.from('item').select('*', { count: 'exact', head: true })
-        ]);
-
-        document.getElementById('qtdUsuarios').textContent = countUsuarios ?? 0;
-        document.getElementById('qtdProdutos').textContent = countProdutos ?? 0;
-      } catch (err) {
-        console.error("Erro ao carregar dados:", err);
-      }
+    if (!emailUsuario) {
+      window.location.href = "../cadastro/login.html";
+      return false;
     }
 
-    (async () => {
-      await verificarLoginDashboard();
-      await carregarDadosDashboard();
-    })();
-  </script>
+    // Busca usuário no banco
+    const { data: usuarioData, error } = await supabase
+      .from("usuario")
+      .select("nome, tipo")
+      .eq("email", emailUsuario)
+      .single();
+
+    if (error || !usuarioData) {
+      console.error("Erro ao buscar usuário:", error);
+      window.location.href = "../cadastro/login.html";
+      return false;
+    }
+
+    // Bloqueia acesso se não for administrador
+    if (usuarioData.tipo !== "Administrador") {
+      alert("Acesso negado. Somente administradores podem acessar esta página.");
+      window.location.href = "../cadastro/login.html";
+      return false;
+    }
+
+    // Saudação personalizada
+    const saudacao = document.getElementById("saudacaoUsuario");
+    if (saudacao) {
+      saudacao.textContent = `Olá, ${usuarioData.nome || nomeUsuario || "Administrador"} 👋`;
+    }
+
+    return true;
+  }
+
+  async function carregarDadosDashboard() {
+    try {
+      const [{ count: countUsuarios }, { count: countProdutos }] = await Promise.all([
+        supabase.from('usuario').select('*', { count: 'exact', head: true }),
+        supabase.from('item').select('*', { count: 'exact', head: true })
+      ]);
+
+      document.getElementById('qtdUsuarios').textContent = countUsuarios ?? 0;
+      document.getElementById('qtdProdutos').textContent = countProdutos ?? 0;
+    } catch (err) {
+      console.error("Erro ao carregar dados:", err);
+    }
+  }
+
+  // 🚀 Inicialização
+  (async () => {
+    const logado = await verificarLoginDashboard();
+    if (logado) await carregarDadosDashboard();
+  })();
+</script>
+
 
 </body>
 </html>
