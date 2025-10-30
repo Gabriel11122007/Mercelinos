@@ -4,13 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SOBRE-NÓS - Dashboard</title>
+  
+  <!-- TailwindCSS e Supabase -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <link rel="icon" type="image/png" href="Icon.jpg">
 </head>
-<link rel="icon" type="image/png" href="Icon.jpg">
 
-<body class="bg-amber-100 flex h-screen">
-
+<body class="bg-amber-100 flex h-screen font-sans">
   <!-- Header (Mobile) -->
   <header
     class="fixed lg:hidden top-0 left-0 w-full bg-yellow-700 text-white flex items-center justify-between px-4 py-3 shadow-md z-40">
@@ -75,29 +77,58 @@
   </button>
 </aside>
 
-  <!-- Main -->
+  <!-- ===== MAIN ===== -->
   <main class="flex-1 p-8 overflow-y-auto mt-16 lg:mt-0">
-    <h1 class="text-3xl font-bold text-yellow-800 mb-6">Gerenciar "Sobre Nós"</h1>
+    
+    <h1 class="text-3xl font-bold text-yellow-800 mb-8 text-center">
+      Gerenciar "Sobre Nós"
+    </h1>
 
-    <!-- Formulário Adicionar -->
-    <form id="formaddabtus" class="bg-yellow-50 p-6 rounded-xl shadow-lg mb-8 flex flex-col gap-4 max-w-md mx-auto" enctype="multipart/form-data">
-      <h2 class="text-2xl font-bold text-yellow-800 text-center">Adicionar nova seção</h2>
-      <input id="novaimagem" type="file" accept="image/*" required class="border border-yellow-600 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-yellow-600 bg-white hover:bg-yellow-100 transition-colors" />
+    <!-- ===== FORMULÁRIO ===== -->
+    <form id="formaddabtus"
+          class="bg-yellow-50 p-6 rounded-xl shadow-lg mb-8 flex flex-col gap-4 max-w-lg mx-auto border border-yellow-200"
+          enctype="multipart/form-data">
+      
+      <h2 class="text-2xl font-bold text-yellow-800 text-center mb-2">
+        Adicionar nova seção
+      </h2>
+
+      <input id="novaimagem" type="file" accept="image/*" required
+             class="border border-yellow-600 rounded-md p-2 focus:ring-2 focus:ring-yellow-600 bg-white hover:bg-yellow-100 transition-colors" />
+
+      <!-- Preview -->
       <div class="flex justify-center">
         <img id="previewimagem" class="hidden w-40 h-40 object-cover rounded-md border border-yellow-600 shadow-sm" />
       </div>
-      <textarea id="novadescricao" placeholder="Descrição" class="border border-yellow-600 rounded-md p-3 h-28 focus:outline-none focus:ring-2 focus:ring-yellow-600 resize-none bg-white shadow-sm" required></textarea>
-      <button type="submit" class="bg-yellow-700 text-white rounded-full py-3 font-semibold hover:bg-yellow-800 transition-all duration-200 shadow-md">Adicionar</button>
+
+      <textarea id="novadescricao" placeholder="Descrição" required
+                class="border border-yellow-600 rounded-md p-3 h-28 focus:ring-2 focus:ring-yellow-600 resize-none bg-white shadow-sm"></textarea>
+
+      <button type="submit"
+              class="bg-yellow-700 text-white rounded-full py-3 font-semibold hover:bg-yellow-800 transition-all shadow-md">
+        Adicionar
+      </button>
     </form>
 
-    <!-- Lista de Seções -->
-    <div id="abtuscontainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    <!-- ===== LISTA ===== -->
+    <div id="abtuscontainer"
+         class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
   </main>
 
-  <!-- Script preview da imagem -->
+  <!-- ===== SCRIPTS ===== -->
+
+  <!-- Inicialização do Supabase -->
+  <script>
+    const SUPABASE_URL = "https://ulxbfffiidjlartupase.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVseGJmZmZpaWRqbGFydHVwYXNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwMDg5OTYsImV4cCI6MjA3MjU4NDk5Nn0.f3-wyXvWJtYR12sWD8bZNW0rFxmz-xq0BT8yuc8boWQ";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  </script>
+
+  <!-- Preview da imagem -->
   <script>
     const inputImg = document.getElementById('novaimagem');
     const previewImg = document.getElementById('previewimagem');
+
     inputImg.addEventListener('change', () => {
       const file = inputImg.files[0];
       if (file) {
@@ -108,6 +139,218 @@
       }
     });
   </script>
+
+<!-- CRUD da seção "Sobre Nós" -->
+<script>
+  async function carregarSecaoSobreNos() {
+    const { data, error } = await supabase
+      .from('abtus')
+      .select('*')
+      .order('id_abtus', { ascending: true })
+      .limit(1);
+
+    const container = document.getElementById('abtuscontainer');
+    container.innerHTML = '';
+
+    if (error) {
+      container.innerHTML = '<p class="text-red-600 text-center">Erro ao carregar a seção.</p>';
+      console.error("Erro ao carregar:", error);
+      return;
+    }
+
+    if (!data || data.length === 0) {
+      container.innerHTML = '<p class="text-yellow-800 font-semibold text-center">Nenhuma seção cadastrada ainda. Adicione uma.</p>';
+      document.getElementById('formaddabtus').classList.remove('hidden');
+      return;
+    }
+
+    // Exibir seção existente
+    const secao = data[0];
+    document.getElementById('formaddabtus').classList.add('hidden');
+
+    const card = document.createElement('div');
+    card.className = 'bg-yellow-50 p-4 rounded-xl shadow-md flex flex-col items-center gap-3 border border-yellow-200';
+
+    const img = document.createElement('img');
+    img.src = secao.url_img;
+    img.alt = 'Imagem da seção';
+    img.className = 'w-40 h-40 object-cover rounded-md border border-yellow-600';
+
+    const desc = document.createElement('p');
+    desc.textContent = secao.descricao;
+    desc.className = 'text-yellow-800 text-center text-lg font-medium';
+
+    const botoes = document.createElement('div');
+    botoes.className = "flex gap-3 mt-3";
+
+    const btnEditar = document.createElement('button');
+    btnEditar.textContent = "Editar";
+    btnEditar.className = "bg-yellow-700 text-white rounded-full py-2 px-5 font-semibold hover:bg-yellow-800 transition-all shadow-md";
+    btnEditar.addEventListener('click', () => editarSecao(secao));
+
+    const btnExcluir = document.createElement('button');
+    btnExcluir.textContent = "Excluir";
+    btnExcluir.className = "bg-red-600 text-white rounded-full py-2 px-5 font-semibold hover:bg-red-700 transition-all shadow-md";
+    btnExcluir.addEventListener('click', () => excluirSecao(secao.id_abtus, secao.url_img));
+
+    botoes.append(btnEditar, btnExcluir);
+    card.append(img, desc, botoes);
+    container.appendChild(card);
+  }
+
+  // Adicionar nova seção
+  const form = document.getElementById('formaddabtus');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const { data: existentes } = await supabase.from('abtus').select('*');
+    if (existentes && existentes.length > 0) {
+      alert("Já existe uma seção 'Sobre Nós'. Edite a existente.");
+      return;
+    }
+
+    const file = document.getElementById('novaimagem').files[0];
+    const descricao = document.getElementById('novadescricao').value.trim();
+
+    if (!file || !descricao) {
+      alert("Por favor, preencha todos os campos.");
+      return;
+    }
+
+    const nomeArquivo = `${Date.now()}_${file.name}`;
+    const caminhoArquivo = `abtus/${nomeArquivo}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('BannersDB')
+      .upload(caminhoArquivo, file);
+
+    if (uploadError) {
+      alert("Erro ao enviar imagem: " + uploadError.message);
+      return;
+    }
+
+    const { data: publicURLData } = supabase.storage.from('BannersDB').getPublicUrl(caminhoArquivo);
+    const imagemURL = publicURLData.publicUrl;
+
+    const { error: insertError } = await supabase
+      .from('abtus')
+      .insert([{ url_img: imagemURL, descricao }]);
+
+    if (insertError) {
+      alert("Erro ao salvar no banco: " + insertError.message);
+      return;
+    }
+
+    alert("Seção 'Sobre Nós' adicionada com sucesso!");
+    form.reset();
+    previewImg.classList.add('hidden');
+    carregarSecaoSobreNos();
+  });
+
+  async function editarSecao(secao) {
+    const novaDescricao = prompt("Edite a descrição:", secao.descricao);
+    if (novaDescricao === null) return;
+
+    const novaImagem = confirm("Deseja alterar a imagem também?");
+    let imagemURL = secao.url_img;
+
+    if (novaImagem) {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.click();
+
+      input.onchange = async () => {
+        const file = input.files[0];
+        if (!file) return;
+
+        const nomeArquivo = `${Date.now()}_${file.name}`;
+        const caminhoArquivo = `abtus/${nomeArquivo}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('BannersDB')
+          .upload(caminhoArquivo, file);
+
+        if (uploadError) {
+          alert("Erro ao enviar nova imagem: " + uploadError.message);
+          return;
+        }
+
+        const { data: publicURLData } = supabase.storage.from('BannersDB').getPublicUrl(caminhoArquivo);
+        imagemURL = publicURLData.publicUrl;
+
+        await atualizarSecao(secao.id_abtus, novaDescricao, imagemURL);
+      };
+    } else {
+      await atualizarSecao(secao.id_abtus, novaDescricao, imagemURL);
+    }
+  }
+
+  async function atualizarSecao(id, descricao, url_img) {
+    const { error } = await supabase
+      .from('abtus')
+      .update({ descricao, url_img })
+      .eq('id_abtus', id);
+
+    if (error) {
+      alert("Erro ao atualizar seção: " + error.message);
+      return;
+    }
+
+    alert("Seção atualizada com sucesso!");
+    carregarSecaoSobreNos();
+  }
+
+  // 🗑️ Função para excluir a seção
+  async function excluirSecao(id, url_img) {
+    const confirmar = confirm("Tem certeza que deseja excluir a seção 'Sobre Nós'? Esta ação não pode ser desfeita.");
+    if (!confirmar) return;
+
+    // Extrair caminho da imagem (ex: "abtus/arquivo.jpg")
+    const partesURL = url_img.split('/'); 
+    const nomeArquivo = partesURL.slice(partesURL.indexOf('abtus')).join('/');
+
+    // Excluir imagem do storage
+    await supabase.storage.from('BannersDB').remove([nomeArquivo]);
+
+    // Excluir registro do banco
+    const { error } = await supabase.from('abtus').delete().eq('id_abtus', id);
+
+    if (error) {
+      alert("Erro ao excluir seção: " + error.message);
+      return;
+    }
+
+    alert("Seção 'Sobre Nós' excluída com sucesso!");
+    document.getElementById('formaddabtus').classList.remove('hidden');
+    carregarSecaoSobreNos();
+  }
+
+  carregarSecaoSobreNos();
+</script>
+
+
+<script>
+  // Função de logout
+  function logout() {
+    // Remove os dados do usuário do localStorage
+    localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("emailUsuario");
+    localStorage.removeItem("nomeUsuario"); // se você estiver armazenando também
+
+    // Mensagem de confirmação
+    alert("Você saiu com sucesso!");
+
+    // Redireciona para a página de login
+    window.location.href = "../cadastro/login.html";
+  }
+
+  // Adiciona o evento ao botão de logout
+  const btnLogout = document.getElementById("logoutBtn");
+  if (btnLogout) {
+    btnLogout.addEventListener("click", logout);
+  }
+</script>
 
   <!-- Script do menu lateral -->
   <script>
@@ -140,107 +383,20 @@
     });
   </script>
 
-  <!-- === VERIFICAR LOGIN ADMIN === -->
-  <script>
-    const SUPABASE_URL = "https://ulxbfffiidjlartupase.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVseGJmZmZpaWRqbGFydHVwYXNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwMDg5OTYsImV4cCI6MjA3MjU4NDk5Nn0.f3-wyXvWJtYR12sWD8bZNW0rFxmz-xq0BT8yuc8boWQ";
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-    async function verificarLoginDashboard() {
-      const isLoggedIn = localStorage.getItem("isLoggedIn");
-      const emailUsuario = localStorage.getItem("emailUsuario");
-
-      if (!isLoggedIn || isLoggedIn !== "true") {
-        window.location.href = "../cadastro/login.html";
-        return;
-      }
-
-      if (emailUsuario) {
-        const { data: usuarioData, error } = await supabase
-          .from("usuario")
-          .select("tipo, nome")
-          .eq("email", emailUsuario)
-          .single();
-
-        if (error || !usuarioData || usuarioData.tipo !== "Administrador") {
-          alert("Acesso negado. Apenas administradores podem acessar.");
-          window.location.href = "../cadastro/login.html";
-          return;
-        }
-      }
+  <!-- ===== ESTILO EXTRA ===== -->
+  <style>
+    .menu-link {
+      background-color: #854d0e;
+      border-radius: 0.75rem;
+      text-align: center;
+      padding: 0.5rem 0.75rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
     }
-
-    verificarLoginDashboard();
-  </script>
-
-
-<script>
-  async function carregarSecoesSobreNos() {
-    const { data, error } = await supabase
-      .from('sobre_nos') // substitua pelo nome correto da sua tabela
-      .select('*')
-      .order('id', { ascending: true });
-
-    const container = document.getElementById('abtuscontainer');
-    container.innerHTML = ''; // limpa antes de renderizar
-
-    if (error) {
-      console.error("Erro ao carregar seções:", error);
-      container.innerHTML = '<p class="text-red-600">Erro ao carregar as seções.</p>';
-      return;
+    .menu-link:hover {
+      background-color: #713f12;
     }
-
-    if (!data || data.length === 0) {
-      container.innerHTML = '<p class="text-yellow-800 font-semibold">Nenhuma seção cadastrada ainda.</p>';
-      return;
-    }
-
-    data.forEach(secao => {
-      const card = document.createElement('div');
-      card.className = 'bg-yellow-50 p-4 rounded-xl shadow-md flex flex-col items-center gap-3';
-
-      const img = document.createElement('img');
-      img.src = secao.imagem_url; // ou o campo correto da imagem na sua tabela
-      img.alt = 'Imagem da seção';
-      img.className = 'w-40 h-40 object-cover rounded-md border border-yellow-600';
-
-      const desc = document.createElement('p');
-      desc.textContent = secao.descricao; // campo da descrição
-      desc.className = 'text-yellow-800 text-center';
-
-      card.appendChild(img);
-      card.appendChild(desc);
-
-      container.appendChild(card);
-    });
-  }
-
-  // Carrega ao abrir a página
-  carregarSecoesSobreNos();
-</script>
-
-
-<script>
-  // Função de logout
-  function logout() {
-    // Remove os dados do usuário do localStorage
-    localStorage.removeItem("isLoggedIn");
-    localStorage.removeItem("emailUsuario");
-    localStorage.removeItem("nomeUsuario"); // se você estiver armazenando também
-
-    // Mensagem de confirmação
-    alert("Você saiu com sucesso!");
-
-    // Redireciona para a página de login
-    window.location.href = "../cadastro/login.html";
-  }
-
-  // Adiciona o evento ao botão de logout
-  const btnLogout = document.getElementById("logoutBtn");
-  if (btnLogout) {
-    btnLogout.addEventListener("click", logout);
-  }
-</script>
+  </style>
 
 </body>
 </html>
