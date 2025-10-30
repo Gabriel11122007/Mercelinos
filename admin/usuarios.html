@@ -256,14 +256,26 @@ btnPesquisa.addEventListener("click", filtrarUsuarios);
 
     // === NOVO: EXCLUIR USUÁRIO ===
     async function excluirUsuario(id) {
-      if (!confirm("Tem certeza que deseja excluir este usuário?")) return;
-      const { error } = await supabase.from("usuario").delete().eq("id_usuario", id);
-      if (error) alert("Erro ao excluir: " + error.message);
-      else {
-        alert("Usuário excluído com sucesso!");
-        carregarUsuarios();
-      }
-    }
+  // Solicita a senha do administrador
+  const senhaAdmin = prompt("Digite sua senha de administrador para confirmar a exclusão:");
+  if (!senhaAdmin) return;
+
+  if (senhaAdmin !== window.adminData.senha) {
+    alert("Senha incorreta! Exclusão cancelada.");
+    return;
+  }
+
+  // Confirmação adicional
+  if (!confirm("Tem certeza que deseja excluir este usuário?")) return;
+
+  const { error } = await supabase.from("usuario").delete().eq("id_usuario", id);
+  if (error) alert("Erro ao excluir: " + error.message);
+  else {
+    alert("Usuário excluído com sucesso!");
+    carregarUsuarios();
+  }
+}
+
 
     // === NOVO: EDITAR USUÁRIO COM SENHA DE ADMIN ===
     async function editarUsuario(id) {

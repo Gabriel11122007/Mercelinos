@@ -173,6 +173,53 @@
     verificarLoginDashboard();
   </script>
 
+
+<script>
+  async function carregarSecoesSobreNos() {
+    const { data, error } = await supabase
+      .from('sobre_nos') // substitua pelo nome correto da sua tabela
+      .select('*')
+      .order('id', { ascending: true });
+
+    const container = document.getElementById('abtuscontainer');
+    container.innerHTML = ''; // limpa antes de renderizar
+
+    if (error) {
+      console.error("Erro ao carregar seções:", error);
+      container.innerHTML = '<p class="text-red-600">Erro ao carregar as seções.</p>';
+      return;
+    }
+
+    if (!data || data.length === 0) {
+      container.innerHTML = '<p class="text-yellow-800 font-semibold">Nenhuma seção cadastrada ainda.</p>';
+      return;
+    }
+
+    data.forEach(secao => {
+      const card = document.createElement('div');
+      card.className = 'bg-yellow-50 p-4 rounded-xl shadow-md flex flex-col items-center gap-3';
+
+      const img = document.createElement('img');
+      img.src = secao.imagem_url; // ou o campo correto da imagem na sua tabela
+      img.alt = 'Imagem da seção';
+      img.className = 'w-40 h-40 object-cover rounded-md border border-yellow-600';
+
+      const desc = document.createElement('p');
+      desc.textContent = secao.descricao; // campo da descrição
+      desc.className = 'text-yellow-800 text-center';
+
+      card.appendChild(img);
+      card.appendChild(desc);
+
+      container.appendChild(card);
+    });
+  }
+
+  // Carrega ao abrir a página
+  carregarSecoesSobreNos();
+</script>
+
+
 <script>
   // Função de logout
   function logout() {
