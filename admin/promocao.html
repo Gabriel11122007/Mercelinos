@@ -91,6 +91,7 @@
 
     <div id="containerProdutos" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
   </main>
+  
 
   <!-- === CONFIG SUPABASE === -->
   <script>
@@ -160,142 +161,196 @@
     });
   </script>
 
-  <!-- === SCRIPT PRINCIPAL === -->
-  <script>
-    const container = document.getElementById("containerProdutos");
-    const filtroEl = document.getElementById("filtro");
-    const mensagemGlobal = document.getElementById("mensagemGlobal");
+<!-- === SCRIPT PRINCIPAL === -->
+<script>
+const container = document.getElementById("containerProdutos");
+const filtroEl = document.getElementById("filtro");
+const mensagemGlobal = document.getElementById("mensagemGlobal");
 
-    // === CARREGAR PRODUTOS ===
-    async function carregarProdutos() {
-      container.innerHTML = `<p class="col-span-full text-center text-yellow-800 font-semibold">Carregando...</p>`;
-      mensagemGlobal.textContent = "";
+// === CARREGAR PRODUTOS ===
+async function carregarProdutos() {
+  container.innerHTML = `<p class="col-span-full text-center text-yellow-800 font-semibold">Carregando...</p>`;
+  mensagemGlobal.textContent = "";
 
-      try {
-        const [{ data: itens, error: erroItens }, { data: promocoes, error: erroProm }] = await Promise.all([
-          supabase.from("item").select("id_item, nome, preco, imagem, descricao"),
-          supabase.from("promocao").select("id_promocao, item_id, desconto")
-        ]);
+  try {
+    const [{ data: itens, error: erroItens }, { data: promocoes, error: erroProm }] = await Promise.all([
+      supabase.from("item").select("id_item, nome, preco, imagem, descricao"),
+      supabase.from("promocao").select("id_promocao, item_id, desconto")
+    ]);
 
-        if (erroItens) throw erroItens;
-        if (erroProm) throw erroProm;
+    if (erroItens) throw erroItens;
+    if (erroProm) throw erroProm;
 
-        renderizarCards(itens || [], promocoes || []);
-      } catch (err) {
-        console.error("Erro ao carregar dados:", err);
-        container.innerHTML = `<p class="col-span-full text-center text-red-600">Erro ao carregar produtos.</p>`;
-      }
-    }
+    renderizarCards(itens || [], promocoes || []);
+  } catch (err) {
+    console.error("Erro ao carregar dados:", err);
+    container.innerHTML = `<p class="col-span-full text-center text-red-600">Erro ao carregar produtos.</p>`;
+  }
+}
 
-    // === RENDERIZAR CARDS ===
-    function renderizarCards(itens, promocoes) {
-      const filtro = filtroEl.value;
-      container.innerHTML = "";
+// === RENDERIZAR CARDS ===
+function renderizarCards(itens, promocoes) {
+  const filtro = filtroEl.value;
+  container.innerHTML = "";
 
-      const itensFiltrados = itens.filter(item => {
-        const temPromo = promocoes.some(p => p.item_id === item.id_item);
-        if (filtro === "com") return temPromo;
-        if (filtro === "sem") return !temPromo;
-        return true;
-      });
+  const itensFiltrados = itens.filter(item => {
+    const temPromo = promocoes.some(p => p.item_id === item.id_item);
+    if (filtro === "com") return temPromo;
+    if (filtro === "sem") return !temPromo;
+    return true;
+  });
 
-      if (itensFiltrados.length === 0) {
-        container.innerHTML = `<p class="col-span-full text-center text-gray-500">Nenhum produto encontrado.</p>`;
-        return;
-      }
+  if (itensFiltrados.length === 0) {
+    container.innerHTML = `<p class="col-span-full text-center text-gray-500">Nenhum produto encontrado.</p>`;
+    return;
+  }
 
-      itensFiltrados.forEach(item => {
-        const promo = promocoes.find(p => p.item_id === item.id_item);
-        const descontoPct = promo ? Math.round(promo.desconto * 100) : 0;
-        const precoBase = Number(item.preco) || 0;
-        const precoFinal = (precoBase * (1 - (promo?.desconto ?? 0))).toFixed(2);
+  itensFiltrados.forEach(item => {
+    const promo = promocoes.find(p => p.item_id === item.id_item);
+    const descontoPct = promo ? Math.round(promo.desconto * 100) : 0;
+    const precoBase = Number(item.preco) || 0;
+    const precoFinal = (precoBase * (1 - (promo?.desconto ?? 0))).toFixed(2);
 
-        const card = document.createElement("div");
-        card.className = "bg-white rounded-xl shadow p-3 flex flex-col";
+    const card = document.createElement("div");
+    card.className = "bg-white rounded-xl shadow p-3 flex flex-col";
 
-        card.innerHTML = `
-          <div class="flex items-start gap-3">
-            <div class="w-32 h-32 flex-shrink-0 flex items-center justify-center overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
-              <img src="${item.imagem || 'https://via.placeholder.com/120x120?text=Sem+Imagem'}"
-                   alt="${escapeHtml(item.nome)}"
-                   class="object-cover w-full h-full">
-            </div>
-            <div class="flex-1 min-w-0">
-              <div class="flex justify-between items-start">
-                <h3 class="text-sm font-semibold text-yellow-800 truncate">${escapeHtml(item.nome)}</h3>
-                <span class="text-xs text-gray-500">ID ${item.id_item}</span>
-              </div>
-              <p class="text-xs text-gray-600 mt-1 line-clamp-2">${escapeHtml(item.descricao || '')}</p>
+    card.innerHTML = `
+      <div class="flex items-start gap-3">
+        <div class="w-32 h-32 flex-shrink-0 flex items-center justify-center overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
+          <img src="${item.imagem || 'https://via.placeholder.com/120x120?text=Sem+Imagem'}"
+               alt="${escapeHtml(item.nome)}"
+               class="object-cover w-full h-full">
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex justify-between items-start">
+            <h3 class="text-sm font-semibold text-yellow-800 truncate">${escapeHtml(item.nome)}</h3>
+            <span class="text-xs text-gray-500">ID ${item.id_item}</span>
+          </div>
+          <p class="text-xs text-gray-600 mt-1 line-clamp-2">${escapeHtml(item.descricao || '')}</p>
 
-              <div class="mt-2 flex items-center gap-2">
-                <div class="text-xs text-gray-700">Original</div>
-                <div class="text-sm font-medium line-through text-red-500">R$ ${precoBase.toFixed(2)}</div>
-              </div>
-
-              <div class="mt-1">
-                <div class="text-xs text-gray-700">Final</div>
-                <div class="text-sm font-bold text-green-700">R$ <span id="final_${item.id_item}">${precoFinal}</span></div>
-              </div>
-            </div>
+          <div class="mt-2 flex items-center gap-2">
+            <div class="text-xs text-gray-700">Original</div>
+            <div class="text-sm font-medium line-through text-red-500">R$ ${precoBase.toFixed(2)}</div>
           </div>
 
-          <div class="mt-3 grid grid-cols-2 gap-2">
-            <div>
-              <label class="block text-xs text-yellow-800 font-medium mb-1">Preço (R$)</label>
-              <input type="number" id="preco_${item.id_item}" value="${precoBase.toFixed(2)}" step="0.01" min="0"
-                     class="w-full border rounded px-2 py-1 text-sm" />
-            </div>
-
-            <div>
-              <label class="block text-xs text-yellow-800 font-medium mb-1">Desconto (%)</label>
-              <input type="number" id="desconto_${item.id_item}" value="${descontoPct}" min="0" max="100" step="1"
-                     class="w-full border rounded px-2 py-1 text-sm" />
-            </div>
-
-            <div class="col-span-2 flex gap-2 mt-2">
-              <button id="salvarBtn_${item.id_item}" onclick="salvarAlteracoes(${item.id_item})"
-                class="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white py-1 rounded text-sm font-semibold">
-                💾 Salvar
-              </button>
-              ${promo ? `<button id="removerBtn_${promo.id_promocao}" onclick="removerPromocao(${promo.id_promocao})"
-                class="bg-red-600 hover:bg-red-700 text-white py-1 px-3 rounded text-sm">🗑️ Remover</button>` : ""}
-            </div>
+          <div class="mt-1">
+            <div class="text-xs text-gray-700">Final</div>
+            <div class="text-sm font-bold text-green-700">R$ <span id="final_${item.id_item}">${precoFinal}</span></div>
           </div>
-        `;
+        </div>
+      </div>
 
-        const precoInput = card.querySelector(`#preco_${item.id_item}`);
-        const descontoInput = card.querySelector(`#desconto_${item.id_item}`);
-        const finalSpan = card.querySelector(`#final_${item.id_item}`);
+      <div class="mt-3 grid grid-cols-2 gap-2">
+        <div>
+          <label class="block text-xs text-yellow-800 font-medium mb-1">Preço (R$)</label>
+          <input type="number" id="preco_${item.id_item}" value="${precoBase.toFixed(2)}" step="0.01" min="0"
+                 class="w-full border rounded px-2 py-1 text-sm" />
+        </div>
 
-        function atualizarFinal() {
-          const p = Number(precoInput.value) || 0;
-          const d = (Number(descontoInput.value) || 0) / 100;
-          finalSpan.textContent = (p * (1 - d)).toFixed(2);
-        }
+        <div>
+          <label class="block text-xs text-yellow-800 font-medium mb-1">Desconto (%)</label>
+          <input type="number" id="desconto_${item.id_item}" value="${descontoPct}" min="0" max="100" step="1"
+                 class="w-full border rounded px-2 py-1 text-sm" />
+        </div>
 
-        precoInput.addEventListener("input", atualizarFinal);
-        descontoInput.addEventListener("input", atualizarFinal);
+        <div class="col-span-2 flex gap-2 mt-2">
+          <button class="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white py-1 rounded text-sm font-semibold btn-salvar">
+            💾 Salvar
+          </button>
+          ${promo ? `<button class="bg-red-600 hover:bg-red-700 text-white py-1 px-3 rounded text-sm btn-remover">
+            🗑️ Remover
+          </button>` : ""}
+        </div>
+      </div>
+    `;
 
-        container.appendChild(card);
-      });
+    const precoInput = card.querySelector(`#preco_${item.id_item}`);
+    const descontoInput = card.querySelector(`#desconto_${item.id_item}`);
+    const finalSpan = card.querySelector(`#final_${item.id_item}`);
+    const btnSalvar = card.querySelector(".btn-salvar");
+    const btnRemover = card.querySelector(".btn-remover");
+
+    function atualizarFinal() {
+      const p = Number(precoInput.value) || 0;
+      const d = (Number(descontoInput.value) || 0) / 100;
+      finalSpan.textContent = (p * (1 - d)).toFixed(2);
     }
 
-    function escapeHtml(str) {
-      if (!str) return "";
-      return String(str)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+    precoInput.addEventListener("input", atualizarFinal);
+    descontoInput.addEventListener("input", atualizarFinal);
+
+    btnSalvar.addEventListener("click", () => salvarAlteracoes(item.id_item, precoInput.value, descontoInput.value));
+
+    if (btnRemover) {
+      btnRemover.addEventListener("click", () => removerPromocao(promo.id_promocao));
     }
 
+    container.appendChild(card);
+  });
+}
 
+// === FUNÇÕES AUXILIARES ===
+async function salvarAlteracoes(idItem, preco, desconto) {
+  try {
+    const descontoDecimal = Number(desconto) / 100;
     
-    // === INICIALIZAÇÃO ===
-    verificarLoginDashboard().then(() => carregarProdutos());
-    filtroEl.addEventListener("change", carregarProdutos);
-  </script>
+    // Verifica se já existe promoção
+    const { data: promoExistente } = await supabase
+      .from("promocao")
+      .select("*")
+      .eq("item_id", idItem)
+      .single();
+
+    if (promoExistente) {
+      // Atualiza promoção
+      await supabase.from("promocao")
+        .update({ desconto: descontoDecimal })
+        .eq("id_promocao", promoExistente.id_promocao);
+    } else if (descontoDecimal > 0) {
+      // Cria nova promoção se desconto > 0
+      await supabase.from("promocao")
+        .insert([{ item_id: idItem, desconto: descontoDecimal }]);
+    }
+
+    // Atualiza preço do item
+    await supabase.from("item")
+      .update({ preco: Number(preco) })
+      .eq("id_item", idItem);
+
+    mensagemGlobal.textContent = `Produto ${idItem} atualizado com sucesso!`;
+    carregarProdutos();
+  } catch (err) {
+    console.error("Erro ao salvar alterações:", err);
+    mensagemGlobal.textContent = `Erro ao atualizar o produto ${idItem}.`;
+  }
+}
+
+async function removerPromocao(idPromocao) {
+  try {
+    await supabase.from("promocao").delete().eq("id_promocao", idPromocao);
+    mensagemGlobal.textContent = "Promoção removida com sucesso!";
+    carregarProdutos();
+  } catch (err) {
+    console.error("Erro ao remover promoção:", err);
+    mensagemGlobal.textContent = "Erro ao remover promoção.";
+  }
+}
+
+function escapeHtml(str) {
+  if (!str) return "";
+  return String(str)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+// === INICIALIZAÇÃO ===
+verificarLoginDashboard().then(() => carregarProdutos());
+filtroEl.addEventListener("change", carregarProdutos);
+</script>
+
 
   <script>
   // Função de logout

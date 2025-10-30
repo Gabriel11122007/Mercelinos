@@ -72,6 +72,16 @@
   <main class="flex-1 p-8 overflow-y-auto mt-16 lg:mt-0">
     <h1 class="text-3xl font-bold text-yellow-800 mb-6">Gerenciar Usuários</h1>
 
+    <div class="mb-4 flex items-center gap-2">
+  <input 
+    type="text" 
+    id="pesquisaUsuario" 
+    placeholder="Pesquisar por nome ou email..." 
+    class="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
+  />
+</div>
+
+
     <div class="overflow-x-auto bg-white rounded-lg shadow-md">
       <table class="w-full text-left border-collapse">
         <thead>
@@ -90,6 +100,35 @@
     </div>
   </main>
 
+
+  <script>
+    // === NOVO: FILTRAR USUÁRIOS ===
+const inputPesquisa = document.getElementById("pesquisaUsuario");
+const btnPesquisa = document.getElementById("btnPesquisarUsuario");
+
+function filtrarUsuarios() {
+  const filtro = inputPesquisa.value.toLowerCase();
+  const linhas = tabelaUsuarios.querySelectorAll("tr");
+
+  linhas.forEach(linha => {
+    const nome = linha.children[1].textContent.toLowerCase();
+    const email = linha.children[2].textContent.toLowerCase();
+
+    if (nome.includes(filtro) || email.includes(filtro)) {
+      linha.style.display = "";
+    } else {
+      linha.style.display = "none";
+    }
+  });
+}
+
+// Evento de busca ao digitar
+inputPesquisa.addEventListener("input", filtrarUsuarios);
+
+// Evento de busca ao clicar no botão
+btnPesquisa.addEventListener("click", filtrarUsuarios);
+
+  </script>
   <!-- Script do menu lateral -->
   <script>
     const sidebar = document.getElementById('sidebar');

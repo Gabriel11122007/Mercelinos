@@ -78,24 +78,46 @@
   <!-- Main -->
   <main class="flex-1 p-8 overflow-y-auto">
     <h1 class="text-3xl font-bold text-yellow-800 mb-6">Gerenciar Categorias</h1>
+    
 
 <!-- Formulário para adicionar categoria -->
-<div class="bg-white p-6 rounded-2xl shadow-lg mb-6 max-w-md mx-auto">
-  <h2 class="text-2xl font-bold text-yellow-800 mb-5 text-center">Adicionar nova categoria</h2>
+<div class="bg-white p-8 rounded-3xl shadow-xl max-w-lg mx-auto mb-8 border border-yellow-200">
+  <h2 class="text-3xl font-bold text-yellow-800 mb-6 text-center">Adicionar Nova Categoria</h2>
 
   <form id="formCategoria" class="flex flex-col sm:flex-row gap-4">
-    <!-- Input da categoria -->
-    <input type="text" id="nomeCategoria" placeholder="Nome da categoria"
-           class="flex-1 border border-gray-300 rounded-full px-4 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-700 shadow-sm"
-           required />
+    <input type="hidden" id="categoria_id" />
 
-    <!-- Botão -->
+    <div class="relative flex-1">
+      <input 
+        type="text" 
+        id="nomeCategoria" 
+        placeholder="Nome da categoria"
+        class="w-full border border-gray-300 rounded-full px-4 py-3 pl-10 focus:outline-none focus:ring-2 focus:ring-yellow-700 focus:border-yellow-600 shadow-sm transition-all duration-200"
+        required 
+      />
+      <!-- Ícone dentro do input -->
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h8M8 12h8M8 17h8" />
+      </svg>
+    </div>
+
     <button type="submit"
-            class="bg-yellow-700 hover:bg-yellow-800 text-white px-6 py-3 rounded-full font-semibold transition-all duration-200 shadow-md">
+      id="btnSubmitCategoria"
+      class="bg-yellow-700 hover:bg-yellow-800 text-white px-6 py-3 rounded-full font-semibold shadow-lg transform transition-all duration-200 hover:scale-105">
       Adicionar
     </button>
   </form>
+  
 </div>
+<div class="mb-4 flex items-center gap-2 max-w-lg mx-auto">
+  <input 
+    type="text" 
+    id="pesquisaCategoria" 
+    placeholder="Pesquisar por nome..." 
+    class="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
+  />
+</div>
+
 
 
     <!-- Tabela -->
@@ -112,6 +134,33 @@
       </table>
     </div>
   </main>
+
+  <script>
+  // === FILTRAR CATEGORIAS ===
+const inputPesquisaCategoria = document.getElementById("pesquisaCategoria");
+const btnPesquisaCategoria = document.getElementById("btnPesquisarCategoria");
+
+function filtrarCategorias() {
+  const filtro = inputPesquisaCategoria.value.toLowerCase();
+  const linhas = document.getElementById('tabelaCategorias').querySelectorAll("tr");
+
+  linhas.forEach(linha => {
+    const nome = linha.children[1].textContent.toLowerCase(); // 2ª coluna = nome
+    if (nome.includes(filtro)) {
+      linha.style.display = "";
+    } else {
+      linha.style.display = "none";
+    }
+  });
+}
+
+// Pesquisa ao digitar
+inputPesquisaCategoria.addEventListener("input", filtrarCategorias);
+
+// Pesquisa ao clicar no botão
+btnPesquisaCategoria.addEventListener("click", filtrarCategorias);
+</script>
+
 
   <!-- Script do menu lateral -->
   <script>
@@ -229,38 +278,60 @@
       const linha = document.createElement('tr');
       linha.classList.add('hover:bg-yellow-50', 'transition');
 
-      linha.innerHTML = `
-        <td class="p-3">${c.id_categoria}</td>
-        <td class="p-3">${c.nome}</td>
-        <td class="p-3 text-center">
-          <button onclick="excluirCategoria(${c.id_categoria})"
-            class="bg-red-600 hover:bg-red-700 text-white py-1 px-4 rounded-full">Excluir</button>
-        </td>
-      `;
+linha.innerHTML = `
+  <td class="p-3">${c.id_categoria}</td>
+  <td class="p-3">${c.nome}</td>
+  <td class="p-3 text-center space-x-2">
+    <button onclick="editarCategoria(${c.id_categoria}, '${c.nome}')"
+      class="bg-blue-600 hover:bg-blue-700 text-white py-1 px-4 rounded-full">Editar</button>
+    <button onclick="excluirCategoria(${c.id_categoria})"
+      class="bg-red-600 hover:bg-red-700 text-white py-1 px-4 rounded-full">Excluir</button>
+  </td>
+`;
+
       tbody.appendChild(linha);
     });
   }
 
-  // Adicionar categoria
-  document.getElementById('formCategoria').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const nome = document.getElementById('nomeCategoria').value.trim();
+document.getElementById('formCategoria').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const id = document.getElementById('categoria_id').value;
+  const nome = document.getElementById('nomeCategoria').value.trim();
 
-    if (!nome) {
-      alert('Digite o nome da categoria.');
-      return;
-    }
+  if (!nome) {
+    alert('Digite o nome da categoria.');
+    return;
+  }
 
-    const { error } = await supabase.from('categoria').insert([{ nome }]);
+  let result;
+  if (id) {
+    // Atualizar categoria
+    result = await supabase.from('categoria').update({ nome }).eq('id_categoria', id);
+  } else {
+    // Inserir nova categoria
+    result = await supabase.from('categoria').insert([{ nome }]);
+  }
 
-    if (error) {
-      alert('Erro ao adicionar categoria: ' + error.message);
-    } else {
-      alert('Categoria adicionada com sucesso!');
-      document.getElementById('formCategoria').reset();
-      carregarCategorias();
-    }
-  });
+  if (result.error) {
+    alert('Erro: ' + result.error.message);
+  } else {
+    alert(id ? 'Categoria atualizada!' : 'Categoria adicionada!');
+    document.getElementById('formCategoria').reset();
+    document.getElementById('categoria_id').value = '';
+    document.getElementById('btnSubmitCategoria').textContent = 'Adicionar';
+    carregarCategorias();
+  }
+});
+
+
+  window.editarCategoria = (id, nome) => {
+  document.getElementById('categoria_id').value = id;
+  document.getElementById('nomeCategoria').value = nome;
+  document.getElementById('btnSubmitCategoria').textContent = 'Salvar Alterações';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
 
   // Excluir categoria
   async function excluirCategoria(id) {

@@ -124,6 +124,17 @@
       <p id="statusUpload" class="text-sm text-gray-700 mt-2"></p>
     </form>
 
+    <div class="mb-4 flex items-center gap-2 max-w-3xl mx-auto">
+  <input 
+    type="text" 
+    id="pesquisaProduto" 
+    placeholder="Pesquisar por nome ou categoria..." 
+    class="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
+  />
+
+</div>
+
+
     <!-- Lista de Itens -->
     <div class="overflow-x-auto bg-white rounded-lg shadow-md">
       <table class="w-full text-left border-collapse">
@@ -142,6 +153,35 @@
       </table>
     </div>
   </main>
+
+  <script>
+    // === FILTRAR PRODUTOS ===
+const inputPesquisaProduto = document.getElementById("pesquisaProduto");
+const btnPesquisaProduto = document.getElementById("btnPesquisarProduto");
+
+function filtrarProdutos() {
+  const filtro = inputPesquisaProduto.value.toLowerCase();
+  const linhas = document.getElementById('tabelaItens').querySelectorAll("tr");
+
+  linhas.forEach(linha => {
+    const nome = linha.children[2].textContent.toLowerCase();
+    const categoria = linha.children[4].textContent.toLowerCase();
+
+    if (nome.includes(filtro) || categoria.includes(filtro)) {
+      linha.style.display = "";
+    } else {
+      linha.style.display = "none";
+    }
+  });
+}
+
+// Pesquisa ao digitar
+inputPesquisaProduto.addEventListener("input", filtrarProdutos);
+
+// Pesquisa ao clicar no botão
+btnPesquisaProduto.addEventListener("click", filtrarProdutos);
+
+  </script>
 
 
     <!-- Script do menu lateral -->
